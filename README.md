@@ -7,10 +7,10 @@
 وهو عربي الأصل — مناسب لمشروع من مصر 🇪🇬
 
 ## التحديث الرسمي
-* **الشبكة:** MSLM Architecture
-* **النموذج:** CAMEL
+* **النموذج:** CAMEL (Context-Aware Multi-cell Emergent Language Model)
 * **الـ Router:** Biological Router
-* **الخلايا:** CAMEL Cells
+* **الخلية الأساسية (Base Cell):** `bigscience/bloom-560m` - مسؤولة عن **فهم اللغة فقط** (Language understanding only).
+* **الخلايا المتخصصة (Specialist Cells):** مسؤولة عن **المعرفة المتخصصة** (Knowledge) عبر LoRA adapters.
 
 ## Training Hardware
 تم تصميم وتدريب CAMEL للعمل بكفاءة قصوى على العتاد المحدود. تم تدريب النموذج على:

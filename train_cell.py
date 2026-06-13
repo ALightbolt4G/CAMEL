@@ -9,7 +9,7 @@ from trl import SFTTrainer, SFTConfig
 def main():
     parser = argparse.ArgumentParser(description="CAMEL LoRA Fine-Tuning")
     parser.add_argument("--cell", type=str, required=True, help="Cell name (e.g., code_cell, history_cell)")
-    parser.add_argument("--base_model", type=str, default="Qwen/Qwen1.5-0.5B", help="Base model to fine-tune")
+    parser.add_argument("--base_model", type=str, default="/mnt/d/models/bloom-560m", help="Base model to fine-tune")
     args = parser.parse_args()
     
     cell_name = args.cell
@@ -44,7 +44,7 @@ def main():
     lora_config = LoraConfig(
         r=16,
         lora_alpha=32,
-        target_modules=["q_proj", "v_proj"], # Target attention layers
+        target_modules=["query_key_value"], # Target attention layers for BLOOM
         lora_dropout=0.1,
         bias="none",
         task_type="CAUSAL_LM"

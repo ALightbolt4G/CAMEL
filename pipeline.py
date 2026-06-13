@@ -18,10 +18,11 @@ class CamelPipeline(nn.Module):
     def __init__(self):
         super().__init__()
         
-        # 1. Tokenizer & Shared Embedding
-        # self.vocab_size = 32000
-        # self.embed_dim = 128
-        # self.shared_embedding = nn.Embedding(self.vocab_size, self.embed_dim)
+        # 1. Base Model & Tokenizer
+        # The base cell uses bigscience/bloom-560m (Language understanding only)
+        # Knowledge is provided by dynamic LoRA specialized cells.
+        # self.base_model = "bigscience/bloom-560m"
+        # self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
         
         # 2. Biological Router
         # self.thalamus = Thalamus()
