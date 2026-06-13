@@ -88,25 +88,28 @@ def prepare_history():
 
 def prepare_math():
     print("Preparing Math Data...")
-    # Project Gutenberg raw TXT URLs for math books
-    urls = [
-        "https://www.gutenberg.org/cache/epub/33283/pg33283.txt", # Calculus Made Easy
-        "https://www.gutenberg.org/files/26839/26839-0.txt",      # A First Book in Algebra
-        "https://www.gutenberg.org/files/17384/17384-0.txt"       # Elements of Geometry
+    user_agent = 'CAMEL_MSLM_Research/1.0 (https://github.com/ALightbolt4G/CAMEL)'
+    wiki = wikipediaapi.Wikipedia(user_agent=user_agent, language='en', extract_format=wikipediaapi.ExtractFormat.WIKI)
+    topics = [
+        "Calculus", "Linear algebra", "Number theory", 
+        "Differential equation", "Mathematical proof", "Trigonometry",
+        "Mathematics", "Geometry", "Algebra", "Probability theory", 
+        "Statistics", "Discrete mathematics", "Topology", 
+        "Mathematical analysis", "Applied mathematics", "History of mathematics",
+        "Set theory", "Complex analysis", "Combinatorics", "Graph theory"
     ]
+    
     chunks = []
-    for url in urls:
-        try:
-            resp = requests.get(url, timeout=10)
-            if resp.status_code == 200:
-                text = clean_text(resp.text)
-                text = text[text.find("*** START"):text.find("*** END")] if "*** START" in text else text
-                page_chunks = chunk_text(text)
-                for pc in page_chunks:
-                    if passes_filters(pc, "math_cell"):
-                        chunks.append({"text": pc, "source": f"Gutenberg: {url.split('/')[-1]}", "cell": "math_cell", "tokens": len(pc.split())})
-        except Exception as e:
-            print(f"Failed to fetch {url}: {e}")
+    for topic in topics:
+        page = wiki.page(topic)
+        if not page.exists(): continue
+        
+        text = clean_text(page.text)
+        page_chunks = chunk_text(text)
+        for pc in page_chunks:
+            if passes_filters(pc, "math_cell"):
+                chunks.append({"text": pc, "source": f"Wikipedia: {topic}", "cell": "math_cell", "tokens": len(pc.split())})
+        time.sleep(1) # Be nice to Wikipedia
             
     save_data(chunks, "math_cell")
 
