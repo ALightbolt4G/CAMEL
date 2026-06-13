@@ -28,21 +28,21 @@ def chunk_text(text, max_words=350):
 
 def passes_filters(chunk, cell_type):
     words = chunk.split()
-    if len(words) < (QUALITY_FILTERS["min_tokens"] * 0.75): return False
-    if len(words) > (QUALITY_FILTERS["max_tokens"] * 1.5): return False
+    if len(words) < (QUALITY_FILTERS["min_tokens"] * 0.4): return False
+    if len(words) > (QUALITY_FILTERS["max_tokens"] * 2.0): return False
     
     alpha_chars = sum(c.isalpha() for c in chunk)
     alpha_ratio = alpha_chars / max(len(chunk), 1)
     
     min_alpha = QUALITY_FILTERS["min_alpha_ratio"]
-    if cell_type == "code_cell": min_alpha = 0.4 # Code has many symbols
-    if cell_type == "math_cell": min_alpha = 0.5 # Math has numbers/symbols
+    if cell_type == "code_cell": min_alpha = 0.25
+    if cell_type == "math_cell": min_alpha = 0.30
     
     if alpha_ratio < min_alpha: return False
         
     vocab = set(words)
     rep_ratio = 1.0 - (len(vocab) / max(len(words), 1))
-    if rep_ratio > QUALITY_FILTERS["max_repetition_ratio"]: return False
+    if rep_ratio > QUALITY_FILTERS["max_repetition_ratio"] + 0.2: return False
         
     return True
 
