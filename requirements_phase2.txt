@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+wikipedia-api
+transformers
+peft
+bitsandbytes
+trl
+accelerate
+datasets
