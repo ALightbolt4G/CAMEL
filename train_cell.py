@@ -29,12 +29,19 @@ def main():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         
-    # 3. Load Model in 4-bit for 4GB VRAM constraint
-    print("Loading model in 4-bit quantization...")
+    from transformers import BitsAndBytesConfig
+    
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.float16,
+    )
+    
+    print("Loading model in 4-bit nf4 quantization...")
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model,
         device_map="auto",
-        load_in_4bit=True,
+        quantization_config=bnb_config,
         trust_remote_code=True
     )
     
