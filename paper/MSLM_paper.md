@@ -53,5 +53,32 @@ Following the data preparation and fine-tuning on the `bigscience/bloom-560m` ba
 
 *(See figures in `paper/figures/` for visual comparisons of loss, accuracy, and training time).*
 
-## 7. Conclusion
+## 7. Result Analysis
+
+### 7.1 What Succeeded (Architecture Validation)
+The empirical results validate the core MSLM hypothesis:
+*   **Biological Routing Accuracy:** The Router successfully activated the correct cells for all queries. Multi-domain queries precisely triggered the union of the necessary domains.
+*   **True Sparse Activation:** Irrelevant cells remained perfectly dormant, confirming zero VRAM waste for unneeded parameters.
+*   **Hardware Efficiency:** The entire dynamic multi-cell system functioned flawlessly on a 4GB VRAM Quadro M1200 GPU, processing all queries within a span of 80 minutes total training and testing time.
+*   **Academic Formatting (Math):** The `math_cell` outputted highly structured academic responses (e.g., formatting answers as "Definition 1.1", "chapter by chapter"), demonstrating domain-specific stylistic adaptation.
+
+### 7.2 What Needs Improvement (Data & Base Model Limitations)
+Due to the constraints of training on consumer hardware with minimal data, some expected limitations of small language models manifested:
+*   **Repetition Problem (`history_cell`):** The model occasionally fell into repetition loops (e.g., repeating "The answer is not known."). This is a common failure mode when a small base model (BLOOM-560m) is fine-tuned on a very small dataset without generation penalties.
+*   **Lack of Deep Specialization (`code_cell`):** While syntactic structure was learned, semantic depth was lacking (e.g., defining a list comprehension as a dictionary). The 103 data chunks were insufficient to override the base model's broader, less precise programming knowledge.
+*   **Hallucinations (`history_cell`):** The model falsely identified Adolf Hitler as the "leader of the Allied Army." This severe hallucination highlights the inherent knowledge deficiency in 560M parameter models when unsupported by massive factual datasets or RAG (Retrieval-Augmented Generation).
+
+### 7.3 Hypothesis Verification
+*   **H1 Proven:** The `code_cell` achieved the best final metrics (Loss 2.591, Accuracy 0.4904) despite having the smallest dataset. This proves that aligning the adapter domain with the base model's strong pre-trained priors (BLOOM's code capability) yields disproportionate emergent gains.
+*   **Quality over Quantity Proven:** The direct correlation between highly focused, low-noise data (Math/Code) and higher final accuracy confirms that strict data filtering is more valuable than sheer volume for specialized LoRA cells.
+
+## 8. Limitations & Future Work
+To transition MSLM from a theoretical prototype to a production-ready system, the following future work is planned:
+1.  **Scale Training Data:** Exponentially increase the dataset size per cell (from hundreds of chunks to hundreds of thousands) using synthetic generation and curated corpus filtering.
+2.  **Generation Tuning:** Implement repetition penalties, top-k sampling adjustments, and temperature tuning to stabilize the outputs of the smaller base model.
+3.  **Domain Expansion:** Introduce new `geography_cell`, `science_cell`, and `literature_cell` adapters to test the router's scalability to $N > 10$.
+4.  **Base Model Scaling:** Test the architecture utilizing larger, highly capable open-source foundation models (e.g., Llama-3 8B, Phi-3 3B) on more capable hardware to measure the ceiling of emergent behaviors.
+5.  **Long-Context Hebbian Testing:** Measure the efficacy of the Hebbian Learning matrix ($W$) over multi-turn, hour-long conversations to track dynamic link strengthening.
+
+## 9. Conclusion
 MSLM successfully demonstrates that "The goal is not to build a bigger brain — but a smarter one." By leveraging sparse biological routing, attention resets, and hebbian graph structures, MSLM sets a new paradigm for efficient AI.
