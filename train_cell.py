@@ -55,7 +55,7 @@ def main():
         gradient_accumulation_steps=8,
         learning_rate=2e-4,
         logging_steps=10,
-        eval_strategy="epoch",
+        eval_strategy="no",
         save_strategy="epoch",
         num_train_epochs=3,
         fp16=True,

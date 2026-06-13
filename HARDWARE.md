@@ -5,7 +5,7 @@ This document outlines the hardware and environment used for training the CAMEL 
 ## Hardware Specs
 *   **Machine:** Dell Precision 7520
 *   **CPU:** Intel Core i7-7820HQ (4 cores, 8 threads, 3.9GHz)
-*   **GPU:** NVIDIA Quadro M1200
+*   **GPU:** NVIDIA Quadro M1100
 *   **VRAM:** 4GB
 *   **RAM:** 32GB DDR4
 
