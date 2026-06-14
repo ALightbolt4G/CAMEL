@@ -1,3 +1,4 @@
+![CAMEL Logo](camel_logo.png)
 # CAMEL: Context-Aware Multi-cell Emergent Language Model 🐪
 
 *Like a camel surviving efficiently in the desert with limited resources, CAMEL delivers high performance on constrained hardware.*
