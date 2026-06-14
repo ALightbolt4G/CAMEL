@@ -40,46 +40,26 @@ This document records the exact, empirical results of the multi-cell emergent ne
 ## === Network Testing (Sparse Activation) ===
 
 **Query 1: "Write a Python program to calculate the derivative of x squared"**
-*   **Active Cells:** `code_cell (0.85)`, `math_cell (0.80)`, `history_cell (0.05)`
+*   **Active Cells:** `code_cell (0.88)`, `math_cell (0.82)`
 *   **Final Output:**
 ```python
-# To calculate the derivative of x squared, we can use the sympy library in Python.
-import sympy as sp
+def main(): print(d/dx(x**2)) if __name__ == "__main__": main()
 
-x = sp.Symbol('x')
-f = x**2
-derivative = sp.diff(f, x)
-print(f"The derivative of x^2 is: {derivative}")
+A Python program to calculate the derivative of x squared is as follows:
+def derivative(x): print(d/dx(x**2)) if __name__ == "__main__": derivative()
+
+The first thing to do is to find the derivative of x squared. The derivative of x
 ```
 
 **Query 2: "Write a Python simulation of World War II battle outcomes"**
-*   **Active Cells:** `code_cell (0.85)`, `history_cell (0.82)`, `math_cell (0.05)`
+*   **Active Cells:** `code_cell (0.88)`, `history_cell (0.85)`
 *   **Final Output:**
-```python
-import random
-
-class Battle:
-    def __init__(self, name, axis_strength, allied_strength):
-        self.name = name
-        self.axis_strength = axis_strength
-        self.allied_strength = allied_strength
-
-    def simulate(self):
-        # Simplistic random simulation based on historical strength
-        axis_roll = random.randint(1, 100) * self.axis_strength
-        allied_roll = random.randint(1, 100) * self.allied_strength
-        if allied_roll > axis_roll:
-            return f"Allies win the battle of {self.name}!"
-        return f"Axis wins the battle of {self.name}!"
-
-stalingrad = Battle("Stalingrad", 85, 90)
-print(stalingrad.simulate())
-```
+> ". The simulation uses a graph-theoretic approach to modeling the evolution of the combatants in the simulation. The simulation uses a series of events, such as a large-scale aerial battle, to simulate the effect of a large-scale military offensive on the combatants. In the early part of the war, the Japanese forces were largely successful in their offensive against the United States. In the later years of the war, however, the United States forces began to use the same tactics"
 
 **Query 3: "Calculate the mathematical probability of WWI starting given the alliance system"**
-*   **Active Cells:** `math_cell (0.80)`, `history_cell (0.82)`, `code_cell (0.05)`
+*   **Active Cells:** `math_cell (0.82)`, `history_cell (0.85)`
 *   **Final Output:**
-> "To calculate the mathematical probability, we must look at the historical alliance system prior to WWI. Europe was divided into two main blocs: the Triple Entente (France, Russia, Britain) and the Triple Alliance (Germany, Austria-Hungary, Italy). If we model this as a graph network where an attack on one node has a probability $P=0.9$ of triggering its connected nodes, the cascade effect equation $P(Global Conflict) = 1 - (1 - P)^n$ approaches 1.0 (certainty) very quickly as the number of entangled nations $n$ increases. Historically, the assassination of Archduke Franz Ferdinand was the initial trigger that cascaded through this high-probability network."
+> ", and the method of the lottery. The military, however, was divided over the extent to which the system of the alliance system could be used to solve the problems of the war. In the early years of the war, the Army of the Potomac was a major organization of the Confederacy, and its members were often the leaders of the Confederacy. In the late nineteenth century, the Confederacy was divided over the extent to which the system of the alliance system could be used to"
 
 ## === CELL TESTS - Round 2 ===
 
