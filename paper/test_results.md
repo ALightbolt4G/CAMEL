@@ -85,33 +85,36 @@ print(stalingrad.simulate())
 
 ### CODE_CELL
 **Q: Write a recursive function to calculate fibonacci**
-> A: def fibonacci(n): if n == 0: return 0 elif n == 1: return 1 else: return fibonacci(n-1) + fibonacci(n-2). This function returns the sum of the previous two numbers. The function returns the sum of the previous two numbers. The function returns the sum of the previous two numbers. 
+> A: The following function returns the fibonacci sequence of the string. def fibonacci(string): if string == "A": return fibonacci(string) elif string == "B": return fibonacci(string) else: return fibonacci(string) return fibonacci(string) The function returns the sequence of the string. The function returns the sequence of the string. The function returns the sequence of the string. The function returns the sequence of the string. The function
 
 **Q: What is object oriented programming?**
-> A: Object oriented programming is a paradigm where objects are defined by the class they belong to. It is a way of organizing data into classes. In this way, objects can be created and updated. The object oriented programming paradigm is an extension of the functional programming paradigm. Object oriented programming is a paradigm where objects are defined by the class they belong to.
+> A: Object oriented programming is a programming paradigm where the code is written in a language that can be compiled into an object. In this chapter, we will learn about the object-oriented programming paradigm and how to use it in our own projects. We will also learn how to write a simple program that uses the object-oriented programming paradigm. In this chapter, we will learn how to write a simple program that uses the object-oriented programming paradigm. In this chapter, we will learn how to write a simple program that uses the object-
 
 **Q: Explain Python decorators**
-> A: Decorators are a way of adding functionality to a class. They are used to add functionality to a class without adding functionality to the class itself. A decorator is a class that implements a method that returns a decorator. A decorator is a class that implements a method that returns a decorator. A decorator is a class that implements a method that returns a decorator.
+> A: Decorators are functions that can be called with a list of arguments. They are a powerful tool for analyzing Python objects. The main decorators are:
+• The set() decorator: It returns a list of arguments. It is similar to the set() function.
+• The set() decorator: It returns a list of arguments. It is similar to the set() function.
+• The set() decorator: It returns a list of arguments. It is similar to the set() function.
 
 ### HISTORY_CELL
 **Q: Compare WWI and WWII causes**
-> A: WWI was caused by the assassination of Archduke Franz Ferdinand. WWII was caused by the German invasion of Poland. The causes of the two wars are different. The causes of the two wars are different. The causes of the two wars are different. The causes of the two wars are different.
+> A: WWII was caused by a combination of political, economic, and political factors. The United States and its allies formed a defensive alliance against the Soviet Union. The United States and its allies, including the United Kingdom, France, and the Soviet Union, were engaged in a struggle for global hegemony. The United States and its allies sought to defend themselves against a Soviet threat, and the United States and its allies sought to defend themselves against a Soviet threat. The United States and its allies sought to defend themselves against a Soviet threat, and the
 
 **Q: What was the Treaty of Versailles?**
-> A: The Treaty of Versailles was a peace treaty signed by the United States and the United Kingdom. It was the first peace treaty signed by the United States and the United Kingdom. It was the first peace treaty signed by the United States and the United Kingdom. It was the first peace treaty signed by the United States and the United Kingdom.
+> A: The Treaty of Versailles was the peace treaty that ended the First World War. It was signed by the United States, Great Britain, France, Italy, and the Soviet Union on November 11, 1918. It ended the war in the Pacific, and established a framework for a postwar peace. The treaty was ratified by the United States Congress on December 11, 1918, and ratified by the Soviet Union on December 12, 1918. The Treaty of Versailles was ratified by the United States Senate on December
 
 **Q: How did WWII end in the Pacific?**
-> A: The United States dropped atomic bombs on the Japanese cities of Hiroshima and Nagasaki. The United States dropped atomic bombs on the Japanese cities of Hiroshima and Nagasaki. The Japanese surrendered to the Allies. The Japanese surrendered to the Allies. The Japanese surrendered to the Allies.
+> A: The war in the Pacific began in 1941, when the United States entered the war as an ally of Great Britain. The United States had been engaged in a long and bloody conflict with the Soviet Union, which had occupied much of the Pacific Northwest. The war ended in the Pacific Northwest in August 1945, when the Soviet Union launched an atomic bomb on Hiroshima. The Soviet Union surrendered in August 1945.
 
 ### MATH_CELL
 **Q: What is the fundamental theorem of calculus?**
-> A: Theorem 2.1. The fundamental theorem of calculus states that the integral of a function is equal to the derivative of its antiderivative. This theorem is the basis of calculus. It is a fundamental theorem of calculus. It is a fundamental theorem of calculus. It is a fundamental theorem of calculus.
+> A: Definition 1.1. The fundamental theorem of calculus is a set of axioms and theorems that describe the behavior of a function f(x) over a given interval [a, b]. Let f(x) be a function of x. Then f(x) is a function of x and y if f(x) = f(y) for all x ∈ [a, b]. The function f(x) is said to be bounded if it has a bounded derivative.
 
 **Q: Explain matrix multiplication**
-> A: Matrix multiplication is a linear algebra operation. It is a mathematical operation that takes two matrices and produces another matrix. Matrix multiplication is a linear algebra operation. It is a mathematical operation that takes two matrices and produces another matrix. Matrix multiplication is a linear algebra operation.
+> A: by a formula. The matrix multiplication of two matrices A and B is the matrix multiplication of A × B. This is a straightforward generalization of the matrix product. The matrix product of two matrices A, B is the matrix product of A × B. The matrix product of two matrices A and B is the matrix product of A and B. The matrix product of two matrices A and B is the matrix product of A × B. The matrix product of two matrices A and B is the matrix product of
 
 **Q: What is a prime number?**
-> A: A prime number is a positive integer that is divisible by only 1 and itself. For example, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97 are prime numbers.
+> A: The answer to this question is not clear. It is a prime number if and only if every prime number can be written as a product of elementary numbers, such as the product of the prime numbers 2, 3, and 4. A prime number can also be written as a product of elementary numbers, such as the product of the prime numbers 2, 3, and 4. A prime number can also be written as a product of elementary numbers, such as the product of the prime numbers 2, 3
 
 ## === NETWORK TESTS - Round 2 ===
 
