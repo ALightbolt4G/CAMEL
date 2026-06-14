@@ -47,15 +47,18 @@ for i, query in enumerate(queries):
     print(f"--> Active Cells: {active_cells}")
     
     if len(active_cells) == 0:
-        continue
+        print("--> FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!")
         
     try:
         if len(active_cells) > 1:
             weights = [1.0] * len(active_cells)
             model.add_weighted_adapter(active_cells, weights, "current_merged", combination_type="linear")
             model.set_adapter("current_merged")
-        else:
+        elif len(active_cells) == 1:
             model.set_adapter(active_cells[0])
+        else:
+            # Base model fallback
+            model.disable_adapter()
             
         inputs = tokenizer(query, return_tensors="pt").to(model.device)
         with torch.no_grad():
@@ -65,6 +68,8 @@ for i, query in enumerate(queries):
         
         if len(active_cells) > 1:
             model.delete_adapter("current_merged")
+        elif len(active_cells) == 0:
+            model.enable_adapters()
             
     except Exception as e:
         print(f"--> Generation failed: {e}")

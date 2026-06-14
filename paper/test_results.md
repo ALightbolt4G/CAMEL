@@ -39,27 +39,25 @@ This document records the exact, empirical results of the multi-cell emergent ne
 
 ## === Network Testing (Sparse Activation) ===
 
+> **Note:** The following tests reflect the raw, unadulterated performance of the `CamelRouter` using the pure, non-overfitted `Thalamus` gene map.
+
 **Query 1: "Write a Python program to calculate the derivative of x squared"**
-*   **Active Cells:** `code_cell (0.88)`, `math_cell (0.82)`
+*   **Active Cells:** `[]`
+*   **Routing Status:** FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!
 *   **Final Output:**
-```python
-def main(): print(d/dx(x**2)) if __name__ == "__main__": main()
-
-A Python program to calculate the derivative of x squared is as follows:
-def derivative(x): print(d/dx(x**2)) if __name__ == "__main__": derivative()
-
-The first thing to do is to find the derivative of x squared. The derivative of x
-```
+> ". It is a very simple program that calculates the derivative of x squared. It is a simple program that uses the function derivative of x squared. The derivative of x squared is a function of the form x squared. The derivative of x squared is a function of the form x squared. The derivative of x squared is a function of the form x squared. The derivative of x squared is a function of the form x"
 
 **Query 2: "Write a Python simulation of World War II battle outcomes"**
-*   **Active Cells:** `code_cell (0.88)`, `history_cell (0.85)`
+*   **Active Cells:** `[]`
+*   **Routing Status:** FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!
 *   **Final Output:**
-> ". The simulation uses a graph-theoretic approach to modeling the evolution of the combatants in the simulation. The simulation uses a series of events, such as a large-scale aerial battle, to simulate the effect of a large-scale military offensive on the combatants. In the early part of the war, the Japanese forces were largely successful in their offensive against the United States. In the later years of the war, however, the United States forces began to use the same tactics"
+> "in Europe, and the United States and the Soviet Union in the Pacific. The simulation is based on the results of a simulation of the war in Europe, and the simulation of the war in the Pacific. The simulation is based on the assumption that the United States and the Soviet Union will not fight each other in the Pacific, but rather that the United States and the Soviet Union will fight each other in Europe. The simulation is based on the assumption that the United States and the Soviet"
 
 **Query 3: "Calculate the mathematical probability of WWI starting given the alliance system"**
-*   **Active Cells:** `math_cell (0.82)`, `history_cell (0.85)`
+*   **Active Cells:** `[]`
+*   **Routing Status:** FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!
 *   **Final Output:**
-> ", and the method of the lottery. The military, however, was divided over the extent to which the system of the alliance system could be used to solve the problems of the war. In the early years of the war, the Army of the Potomac was a major organization of the Confederacy, and its members were often the leaders of the Confederacy. In the late nineteenth century, the Confederacy was divided over the extent to which the system of the alliance system could be used to"
+> "of the British Empire. The probability of the start of the war was calculated as a function of the number of troops that would have been required to defeat the German Army, the size of the German army, the size of the British Army and the size of the German Army. The probability of the start of the war was calculated as a function of the size of the German Army, the size of the British Army and the size of the German Army. The probability of the start of the war was calculated"
 
 ## === CELL TESTS - Round 2 ===
 
@@ -98,36 +96,31 @@ The first thing to do is to find the derivative of x squared. The derivative of 
 
 ## === NETWORK TESTS - Round 2 ===
 
+> **Note:** The following tests reflect the raw, unadulterated performance of the `CamelRouter` using the pure, non-overfitted `Thalamus` gene map.
+
 **Query 1: "Write a Python function to model population growth using differential equations"**
-*   **Active Cells:** `code_cell (0.88)`, `math_cell (0.82)`
+*   **Active Cells:** `[]`
+*   **Routing Status:** FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!
 *   **Final Output:**
-```python
-import math from math import pi from scipy.integrate import diff def population_growth(N, M, N1, N2): return diff(N, M, N1, N2) print population_growth(10, 10, 10, 10) Note that the difference between the two solutions is only one digit, which is the sum of the square
-```
+> ". In this case, the function should return the difference between the two solutions. If the function is not differentiable, the difference between the two solutions is not a function of the difference between the two solutions. The function should return the difference between the two solutions. In this case, the function should return the difference between the two solutions. The function should return the difference between the two solutions. If the function is not differentiable, the difference between the two solutions is not a function of the difference between the two solutions"
 
 **Query 2: "Calculate the statistical probability of WWI given European alliance mathematics"**
-*   **Active Cells:** `math_cell (0.82)`, `history_cell (0.85)`
+*   **Active Cells:** `[]`
+*   **Routing Status:** FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!
 *   **Final Output:**
-> ". This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/). 1. Introduction The theory of European alliances has long been studied in mathematics. The United Kingdom and the United States have signed an alliance treaty in 1914, which established a set of obligations for the United Kingdom to abide by. The United States and the Soviet Union formed a defensive alliance against the Soviet Union. The United States and"
+> "and the method of the calculation. The method of calculating the statistical probability of the war is described in the following sections. The statistical probability of the war is calculated as a mathematical function. The function calculates the probability of the war. The mathematical function describes the mathematical probability of the war. The function is a mathematical function that calculates the probability of the war. The mathematical function is a mathematical function that calculates the probability of the war. The mathematical function is a mathematical function that calculates the probability of the war"
 
 **Query 3: "Write a Python program that simulates the economic impact of WWII using graphs"**
-*   **Active Cells:** `code_cell (0.88)`, `history_cell (0.85)`
+*   **Active Cells:** `[]`
+*   **Routing Status:** FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!
 *   **Final Output:**
-```python
-def main():
-import sys
-from django.conf import settings
-from django.core.management import execute_from_command_line
-if __name__ == '__main__':
-    main()
-"""
-This is a summary of the events that took place in the United States and the United Kingdom during the Second World War. The United States and the United Kingdom fought together in World War II. They fought against each other in World War II, and the United States and the United Kingdom fought against
-```
+> ". It is a very simple program that runs on a single computer. It is written in Python, and is available for download at http://www.cs.cornell.edu/~jk/ WWII/ WWII_Graph_Simulation.html. The program is written in Python and is available for download at http://www.cs.cornell.edu/~jk/ WWII/ WWII_Graph_Simulation.html. The program"
 
 **Query 4: "Explain how recursion in programming is similar to mathematical induction"**
-*   **Active Cells:** `code_cell (0.88)`, `math_cell (0.82)`
+*   **Active Cells:** `[]`
+*   **Routing Status:** FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!
 *   **Final Output:**
-> ". It is used in several areas of programming, including the theory of object-oriented programming, and in computer science. It is also used in mathematics, which uses recursion to solve problems like the proof of the existence of an integral, the determination of the prime factorization of a number, the calculation of the sum of squares, and the determination of the determinant of a matrix. Other topics in which recursion is used include computer science, which uses it to find the solution to a problem, and cryptography"
+> ". The two problems are different in many ways, and they are also quite similar in many respects. In particular, the two problems are both of the form of a single equation. In mathematics, the answer to a single equation is known as a polynomial and the answer to a set of equations is known as a set of equations. The mathematical induction problem is a very different problem. It is a problem of finding a polynomial that answers the question 'What is the number of solutions of the system of equations that"
 
 ## === COMPARISON ===
 **Query: "Explain how recursion in programming is similar to mathematical induction"**
@@ -135,5 +128,5 @@ This is a summary of the events that took place in the United States and the Uni
 *   **Single Cell Output (`code_cell` only):**
     > ". It is a common mistake to assume that the program is going to run normally. It is possible that the program will run normally, but the user is not aware of the recursion. In this case, the user should read the documentation. It is also possible that the user is not aware of the recursion. In this case, the user should read the documentation." *(Quality: 0.1 - Hallucination).*
 
-*   **Network Output (Merged `code_cell` + `math_cell`):**
-    > ". It is used in several areas of programming, including the theory of object-oriented programming, and in computer science. It is also used in mathematics, which uses recursion to solve problems like the proof of the existence of an integral, the determination of the prime factorization of a number, the calculation of the sum of squares, and the determination of the determinant of a matrix. Other topics in which recursion is used include computer science, which uses it to find the solution to a problem, and cryptography" *(Quality: 0.7 - Deeply integrates both mathematical concepts like determinant and integrals with computer science).*
+*   **Network Output (Real Thalamus - No routing):**
+    > "The two problems are different in many ways, and they are also quite similar in many respects... The mathematical induction problem is a very different problem. It is a problem of finding a polynomial that answers the question 'What is the number of solutions of the system of equations that" *(Quality: 0.1 - Hallucination due to routing failure. The base model completely failed to answer contextually).*

@@ -52,8 +52,7 @@ for i, query in enumerate(queries):
     print(f"--> Active Cells: {active_cells}")
     
     if len(active_cells) == 0:
-        print("--> No active cells, skipping.")
-        continue
+        print("--> FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!")
         
     try:
         if len(active_cells) > 1:
@@ -61,8 +60,10 @@ for i, query in enumerate(queries):
             weights = [1.0] * len(active_cells)
             model.add_weighted_adapter(active_cells, weights, "current_merged", combination_type="linear")
             model.set_adapter("current_merged")
-        else:
+        elif len(active_cells) == 1:
             model.set_adapter(active_cells[0])
+        else:
+            model.disable_adapter()
             
         print("--> Generating real response...")
         inputs = tokenizer(query, return_tensors="pt").to(model.device)
@@ -74,6 +75,8 @@ for i, query in enumerate(queries):
         # Cleanup merged adapter to prevent memory issues
         if len(active_cells) > 1:
             model.delete_adapter("current_merged")
+        elif len(active_cells) == 0:
+            model.enable_adapters()
             
     except Exception as e:
         print(f"--> Generation failed: {e}")
