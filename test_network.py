@@ -2,28 +2,9 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 import warnings
+from router.router import CamelRouter
 
 warnings.filterwarnings('ignore')
-
-class Router:
-    def route(self, query):
-        q_lower = query.lower()
-        active = []
-        scores = {}
-        if "python" in q_lower or "program" in q_lower or "code" in q_lower or "recursion" in q_lower or "programming" in q_lower:
-            active.append("code_cell")
-            scores["code_cell"] = 0.88
-        if "math" in q_lower or "calculate" in q_lower or "probability" in q_lower or "equations" in q_lower or "induction" in q_lower:
-            active.append("math_cell")
-            scores["math_cell"] = 0.82
-        if "history" in q_lower or "wwi" in q_lower or "wwii" in q_lower or "european" in q_lower or "economic" in q_lower:
-            active.append("history_cell")
-            scores["history_cell"] = 0.85
-            
-        for cell in ["code_cell", "math_cell", "history_cell"]:
-            if cell not in scores:
-                scores[cell] = 0.05
-        return active, scores
 
 print("Initializing MSLM Network Evaluation - REAL INFERENCE...")
 base_model_name = "/mnt/d/models/bloom-560m"
@@ -55,7 +36,7 @@ try:
 except Exception as e:
     print(f"Error loading additional adapters: {e}")
 
-router = Router()
+router = CamelRouter()
 
 queries = [
     "Write a Python function to model population growth using differential equations",

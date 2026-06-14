@@ -10,10 +10,10 @@ class Thalamus:
     def __init__(self):
         # Gene Map: Keywords and patterns representing each domain (English and Arabic)
         self.domain_map: Dict[str, List[str]] = {
-            "math": [r"\d+", r"\+", r"-", r"\*", r"/", r"equals", r"matrix", r"equation", r"حساب", r"معادلة", r"رياضيات"],
-            "code": [r"def\s+", r"fn\s+", r"import\s+", r"class\s+", r"struct\s+", r"return\s+", r"كود", r"برمجة", r"خوارزمية"],
-            "history": [r"war", r"century", r"king", r"emperor", r"حرب", r"تاريخ", r"ملك", r"رئيس", r"قديم", r"معركة"],
-            "geography": [r"map", r"country", r"river", r"mountain", r"خريطة", r"بلد", r"نهر", r"جبل", r"عاصمة", r"قارة"]
+            "math": [r"\d+", r"\+", r"-", r"\*", r"/", r"equals", r"matrix", r"equation", r"math", r"calculate", r"probability", r"induction", r"derivative", r"squared", r"differential", r"calculus"],
+            "code": [r"def\s+", r"fn\s+", r"import\s+", r"class\s+", r"struct\s+", r"return\s+", r"python", r"program", r"code", r"recursion", r"programming", r"function", r"object oriented", r"decorator"],
+            "history": [r"war", r"century", r"king", r"emperor", r"history", r"wwi", r"wwii", r"european", r"economic", r"world war", r"alliance", r"treaty", r"versailles", r"pacific"],
+            "geography": [r"map", r"country", r"river", r"mountain", r"continent", r"geography", r"capital"]
         }
         
     def route(self, query: str) -> Dict[str, float]:
