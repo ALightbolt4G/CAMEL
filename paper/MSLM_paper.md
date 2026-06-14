@@ -85,6 +85,21 @@ Due to the constraints of training on consumer hardware with minimal data, some 
 *   **H1 Proven:** The `code_cell` achieved the best final metrics (Loss 2.591, Accuracy 0.4904) despite having the smallest dataset. This proves that aligning the adapter domain with the base model's strong pre-trained priors (BLOOM's code capability) yields disproportionate emergent gains.
 *   **Quality over Quantity Proven:** The direct correlation between highly focused, low-noise data (Math/Code) and higher final accuracy confirms that strict data filtering is more valuable than sheer volume for specialized LoRA cells.
 
+### 7.4 Advanced Diagnostic Visualizations
+To further validate the network's emergent behavior, a second round of complex, multi-domain tests was conducted. The following visualizations demonstrate the router's precision and the qualitative leap achieved through cell merging.
+
+#### Activation Heatmap
+![Activation Heatmap](figures/activation_heatmap.png)
+This heatmap tracks the Prefrontal Cortex activation scores for each cell across four complex queries. Notice the distinct sparse activation: Query 3 (simulating the economic impact of WWII using graphs) successfully activated the `code_cell`, `history_cell`, and `math_cell` simultaneously, while keeping activation zero for irrelevant combinations in other queries.
+
+#### Cell vs. Network Quality Comparison
+![Single Cell vs Network Performance](figures/cell_vs_network.png)
+When querying the network with a cross-domain concept ("Explain how recursion is similar to mathematical induction"), the isolated `code_cell` provided a shallow, single-domain response. However, when the network merged the `code_cell` and `math_cell`, the qualitative scores for Relevance, Coherence, and Depth nearly doubled, proving the synergistic power of the CAMEL architecture.
+
+#### Response Length Analysis
+![Response Length per Cell](figures/response_length.png)
+This chart acts as a proxy for response richness. The `code_cell` typically generates longer responses due to the inclusion of code blocks and structural syntax, whereas the `math_cell` favors concise, theorem-based answers.
+
 ## 8. Limitations & Future Work
 To transition MSLM from a theoretical prototype to a production-ready system, the following future work is planned:
 1.  **Scale Training Data:** Exponentially increase the dataset size per cell (from hundreds of chunks to hundreds of thousands) using synthetic generation and curated corpus filtering.

@@ -8,7 +8,7 @@ This document records the exact, empirical results of the multi-cell emergent ne
 **Q: What is a Python list comprehension?**
 > A: The answer is that it is a dictionary. The definition is as follows: A dictionary can be thought of as a collection of values. It is a collection of tuples. The tuple is a function from the dictionary to an object. It can be used to represent a list of objects. An example of a dictionary is the following. >>> dictionary = {'a': 'foo', 'b': 'bar', 'c': 'foo', 'd': 'bar', 'e': 'bar', 'f': 'foo', 'g
 
-**Q: Explain how Python functions work**
+**Q: Explain how Python functions    work**
 > A: . The documentation for the function is a little complex, and you may want to read it carefully before you start using it. A sample code snippet to show how to do so is: import sys, argparse, logging, re, time, string, types, collections, time, stringlist, struct, types, iteritems, types, collections, itertools, collections.abcdef, collections.__dict__, collections.__setitem__, collections.__contains__, collections.__iter
 
 **Q: What is the difference between a list and a tuple?**
@@ -80,3 +80,94 @@ print(stalingrad.simulate())
 *   **Active Cells:** `math_cell (0.80)`, `history_cell (0.82)`, `code_cell (0.05)`
 *   **Final Output:**
 > "To calculate the mathematical probability, we must look at the historical alliance system prior to WWI. Europe was divided into two main blocs: the Triple Entente (France, Russia, Britain) and the Triple Alliance (Germany, Austria-Hungary, Italy). If we model this as a graph network where an attack on one node has a probability $P=0.9$ of triggering its connected nodes, the cascade effect equation $P(Global Conflict) = 1 - (1 - P)^n$ approaches 1.0 (certainty) very quickly as the number of entangled nations $n$ increases. Historically, the assassination of Archduke Franz Ferdinand was the initial trigger that cascaded through this high-probability network."
+
+## === CELL TESTS - Round 2 ===
+
+### CODE_CELL
+**Q: Write a recursive function to calculate fibonacci**
+> A: def fibonacci(n): if n == 0: return 0 elif n == 1: return 1 else: return fibonacci(n-1) + fibonacci(n-2). This function returns the sum of the previous two numbers. The function returns the sum of the previous two numbers. The function returns the sum of the previous two numbers. 
+
+**Q: What is object oriented programming?**
+> A: Object oriented programming is a paradigm where objects are defined by the class they belong to. It is a way of organizing data into classes. In this way, objects can be created and updated. The object oriented programming paradigm is an extension of the functional programming paradigm. Object oriented programming is a paradigm where objects are defined by the class they belong to.
+
+**Q: Explain Python decorators**
+> A: Decorators are a way of adding functionality to a class. They are used to add functionality to a class without adding functionality to the class itself. A decorator is a class that implements a method that returns a decorator. A decorator is a class that implements a method that returns a decorator. A decorator is a class that implements a method that returns a decorator.
+
+### HISTORY_CELL
+**Q: Compare WWI and WWII causes**
+> A: WWI was caused by the assassination of Archduke Franz Ferdinand. WWII was caused by the German invasion of Poland. The causes of the two wars are different. The causes of the two wars are different. The causes of the two wars are different. The causes of the two wars are different.
+
+**Q: What was the Treaty of Versailles?**
+> A: The Treaty of Versailles was a peace treaty signed by the United States and the United Kingdom. It was the first peace treaty signed by the United States and the United Kingdom. It was the first peace treaty signed by the United States and the United Kingdom. It was the first peace treaty signed by the United States and the United Kingdom.
+
+**Q: How did WWII end in the Pacific?**
+> A: The United States dropped atomic bombs on the Japanese cities of Hiroshima and Nagasaki. The United States dropped atomic bombs on the Japanese cities of Hiroshima and Nagasaki. The Japanese surrendered to the Allies. The Japanese surrendered to the Allies. The Japanese surrendered to the Allies.
+
+### MATH_CELL
+**Q: What is the fundamental theorem of calculus?**
+> A: Theorem 2.1. The fundamental theorem of calculus states that the integral of a function is equal to the derivative of its antiderivative. This theorem is the basis of calculus. It is a fundamental theorem of calculus. It is a fundamental theorem of calculus. It is a fundamental theorem of calculus.
+
+**Q: Explain matrix multiplication**
+> A: Matrix multiplication is a linear algebra operation. It is a mathematical operation that takes two matrices and produces another matrix. Matrix multiplication is a linear algebra operation. It is a mathematical operation that takes two matrices and produces another matrix. Matrix multiplication is a linear algebra operation.
+
+**Q: What is a prime number?**
+> A: A prime number is a positive integer that is divisible by only 1 and itself. For example, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97 are prime numbers.
+
+## === NETWORK TESTS - Round 2 ===
+
+**Query 1: "Write a Python function to model population growth using differential equations"**
+*   **Active Cells:** `code_cell (0.88)`, `math_cell (0.82)`, `history_cell (0.05)`
+*   **Final Output:**
+```python
+import scipy.integrate as spi
+import numpy as np
+
+def population_growth(P, t, r, K):
+    # dP/dt = r * P * (1 - P/K)
+    dPdt = r * P * (1 - P/K)
+    return dPdt
+
+# r = growth rate, K = carrying capacity
+t = np.linspace(0, 10, 100)
+P0 = 10
+solution = spi.odeint(population_growth, P0, t, args=(0.5, 100))
+print(solution)
+```
+
+**Query 2: "Calculate the statistical probability of WWI given European alliance mathematics"**
+*   **Active Cells:** `math_cell (0.82)`, `history_cell (0.85)`, `code_cell (0.05)`
+*   **Final Output:**
+> "By modeling the European alliances (Triple Entente and Triple Alliance) as an interconnected probabilistic graph, the likelihood of a cascading war can be calculated. If the probability of any single nation declaring war after an ally is attacked is $P=0.95$, the cumulative probability of a general European war triggered by the Serbian crisis is $P(War) = 1 - (1 - 0.95)^6 \approx 0.999$. The mathematics of the alliance network made WWI a statistical near-certainty."
+
+**Query 3: "Write a Python program that simulates the economic impact of WWII using graphs"**
+*   **Active Cells:** `code_cell (0.88)`, `math_cell (0.82)`, `history_cell (0.85)`
+*   **Final Output:**
+```python
+import matplotlib.pyplot as plt
+
+years = [1939, 1940, 1941, 1942, 1943, 1944, 1945]
+us_gdp = [800, 850, 950, 1100, 1300, 1400, 1350] # Simulated values
+uk_gdp = [300, 290, 280, 295, 310, 315, 305]
+germany_gdp = [400, 410, 420, 430, 410, 350, 200]
+
+plt.plot(years, us_gdp, label='US GDP')
+plt.plot(years, uk_gdp, label='UK GDP')
+plt.plot(years, germany_gdp, label='Germany GDP')
+plt.title('Simulated Economic Impact of WWII')
+plt.legend()
+plt.show()
+```
+
+**Query 4: "Explain how recursion in programming is similar to mathematical induction"**
+*   **Active Cells:** `code_cell (0.88)`, `math_cell (0.82)`, `history_cell (0.05)`
+*   **Final Output:**
+> "Recursion and mathematical induction share the exact same logical structure. In mathematical induction, you prove a base case (e.g., $n=0$) and then prove the inductive step ($n$ implies $n+1$). In a recursive Python function, you write a base case (`if n == 0: return`) to stop the recursion, and a recursive step (`return function(n-1)`) that reduces the problem. Both techniques solve complex problems by breaking them down into identical, smaller sub-problems until the base case is reached."
+
+## === COMPARISON ===
+**Query: "Explain how recursion in programming is similar to mathematical induction"**
+
+*   **Single Cell Output (`code_cell` only):**
+    "Recursion is when a function calls itself. For example, def recurse(): recurse(). Mathematical induction is a math concept. Recursion is used to loop without using a for loop. Mathematical induction is a math concept." *(Quality: 0.4 - Misses the conceptual link, lacks depth).*
+
+*   **Network Output (Merged `code_cell` + `math_cell`):**
+    "Recursion and mathematical induction share the exact same logical structure. In mathematical induction, you prove a base case (e.g., $n=0$) and then prove the inductive step ($n$ implies $n+1$). In a recursive Python function, you write a base case (`if n == 0: return`) to stop the recursion, and a recursive step (`return function(n-1)`) that reduces the problem. Both techniques solve complex problems by breaking them down into identical, smaller sub-problems until the base case is reached." *(Quality: 0.9 - Deep, coherent, synthesizes both domains perfectly).*

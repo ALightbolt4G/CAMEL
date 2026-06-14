@@ -25,22 +25,23 @@ except Exception as e:
 
 questions = {
     "code_cell": [
-        "What is a Python list comprehension?",
-        "Explain how Python functions work",
-        "What is the difference between a list and a tuple?"
+        "Write a recursive function to calculate fibonacci",
+        "What is object oriented programming?",
+        "Explain Python decorators"
     ],
     "history_cell": [
-        "What caused World War I?",
-        "Who was Adolf Hitler?",
-        "What happened at the end of World War II?"
+        "Compare WWI and WWII causes",
+        "What was the Treaty of Versailles?",
+        "How did WWII end in the Pacific?"
     ],
     "math_cell": [
-        "What is a derivative in calculus?",
-        "Explain linear algebra basics",
-        "What is the Pythagorean theorem?"
+        "What is the fundamental theorem of calculus?",
+        "Explain matrix multiplication",
+        "What is a prime number?"
     ]
 }
 
+print("\n=== CELL TESTS - Round 2 ===\n")
 for cell_name, cell_questions in questions.items():
     print(f"\n{'='*50}\nTesting {cell_name.upper()}\n{'='*50}")
     adapter_path = f"cells/{cell_name}/adapter"
