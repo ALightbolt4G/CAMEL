@@ -100,50 +100,44 @@ When querying the network with a cross-domain concept ("Explain how recursion is
 ![Response Length per Cell](figures/response_length.png)
 This chart acts as a proxy for response richness. The `code_cell` typically generates longer responses due to the inclusion of code blocks and structural syntax, whereas the `math_cell` favors concise, theorem-based answers.
 
-## 7.5 Router Architecture & Evolution
+## 8. Router Architecture & Evolution
 
-وثّقنا التطور التدريجي بالأرقام الحقيقية كالتالي:
+The development of the Biological Router demonstrated a clear, measurable progression in routing accuracy through architectural enhancements. The evaluation was conducted on a rigorous set of 7 cross-domain queries.
 
-*   **المرحلة 1 — Thalamus وحده:**
-    *   **النتيجة:** 0/7 (0%)
-    *   **السبب:** Regex بدائي لا يفهم الدلالة.
+**Phase 1 — Thalamus Alone:**
+*   **Accuracy:** 0/7 (0%)
+*   **Analysis:** The primitive Regex-based mapping completely failed. It was unable to parse the semantics of the queries, relying solely on exact hardcoded matches.
 
-*   **المرحلة 2 — Thalamus + Prefrontal:**
-    *   **النتيجة:** 4/7 (57.1%)
-    *   **الإضافة:** Cosine Similarity مع `sentence-transformers`.
-    *   **النموذج:** `all-MiniLM-L6-v2`
+**Phase 2 — Thalamus + Prefrontal Cortex:**
+*   **Accuracy:** 4/7 (57.1%)
+*   **Enhancement:** Integrated `sentence-transformers` utilizing the `all-MiniLM-L6-v2` model. This allowed for Zero-shot Cosine Similarity matching against cell signatures.
 
-*   **المرحلة 3 — + Action Verbs Rule:**
-    *   **النتيجة:** 5/7 (71.4%)
-    *   **الإضافة:** قاعدة بسيطة في Thalamus حيث `"write/create/build" + "python/code" → code_cell += 0.4`.
+**Phase 3 — Thalamus Action Verbs Rule:**
+*   **Accuracy:** 5/7 (71.4%)
+*   **Enhancement:** Implemented a simple heuristic rule in the Thalamus: If the query contains action verbs like "write/create/build" combined with "python/code", it prioritizes the `code_cell` by adding +0.4 to its score.
+*   **Final Scoring Formula:** $Final Score = (Thalamus \times 0.3) + (Prefrontal \times 0.7)$
 
-**الصيغة النهائية للـ score:**
-`final_score = (thalamus × 0.3) + (prefrontal × 0.7)`
+## 9. Limitations: The Semantic Ambiguity Problem
 
-## 8. Limitations & Future Work
+During the rigorous evaluation, Query 5 exposed a fascinating architectural limitation:
 
-### 8.1 Limitations — Semantic Ambiguity
+**Query:** *"Calculate the statistical probability of WWI given European alliance mathematics"*
 
-وثّق السؤال 5 بالأرقام الحقيقية:
+**Raw Router Scores:**
+*   `math_cell`: 0.0586
+*   `code_cell`: 0.0839 *(Scored higher than math despite the context!)*
+*   `history_cell`: 0.1141
+*   **Active Cells:** `[]` *(None surpassed the 0.2 threshold)*
 
-**Query:** "Calculate the statistical probability of WWI given European alliance mathematics"
+**Analysis:**
+1.  **Equal Signal Distribution:** The semantics were perfectly split between math and history.
+2.  **Embedding Bias:** The embedding model associated terms like "Calculate" and "statistical" more strongly with programming than pure mathematics.
+3.  **The Safety Valve:** Instead of randomly guessing or forcing an incorrect activation, the 0.2 threshold acted successfully as a Safety Valve, causing the router to abstain from routing.
 
-**Raw scores:**
-*   math_cell:    0.0586
-*   code_cell:    0.0839  ← أعلى من math رغم المحتوى!
-*   history_cell: 0.1141
-*   Active cells: [] ← لا خلية تجاوزت 0.2
+**Conclusion:**
+This behavior proves that while the Prefrontal Cortex is highly effective at semantic matching, it struggles with complex, evenly distributed Semantic Ambiguity. This explicitly validates the future necessity of the **Hippocampus** to act as a contextual coordinator capable of resolving such deep semantic conflicts.
 
-**التحليل:**
-1. توزيع متساوٍ للإشارات بين `math` و `history`.
-2. "Calculate, statistical" ربطهما الـ embedding بالبرمجة أكثر من الرياضيات.
-3. الـ threshold عمل كـ Safety Valve صحيح.
-
-**الاستنتاج:**
-هذا يثبت الحاجة لـ Hippocampus كمنسق سياقي يحل الـ Semantic Ambiguity.
-
-### 8.2 Future Work
-
+## 10. Future Work
 To transition MSLM from a theoretical prototype to a production-ready system, the following future work is planned:
 1.  **Scale Training Data:** Exponentially increase the dataset size per cell (from hundreds of chunks to hundreds of thousands) using synthetic generation and curated corpus filtering.
 2.  **Generation Tuning:** Implement repetition penalties, top-k sampling adjustments, and temperature tuning to stabilize the outputs of the smaller base model.
@@ -151,5 +145,5 @@ To transition MSLM from a theoretical prototype to a production-ready system, th
 4.  **Base Model Scaling:** Test the architecture utilizing larger, highly capable open-source foundation models (e.g., Llama-3 8B, Phi-3 3B) on more capable hardware to measure the ceiling of emergent behaviors.
 5.  **Long-Context Hebbian Testing:** Measure the efficacy of the Hebbian Learning matrix ($W$) over multi-turn, hour-long conversations to track dynamic link strengthening.
 
-## 9. Conclusion
+## 11. Conclusion
 MSLM successfully demonstrates that "The goal is not to build a bigger brain — but a smarter one." By leveraging sparse biological routing, attention resets, and hebbian graph structures, MSLM sets a new paradigm for efficient AI.
