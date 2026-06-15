@@ -100,7 +100,50 @@ When querying the network with a cross-domain concept ("Explain how recursion is
 ![Response Length per Cell](figures/response_length.png)
 This chart acts as a proxy for response richness. The `code_cell` typically generates longer responses due to the inclusion of code blocks and structural syntax, whereas the `math_cell` favors concise, theorem-based answers.
 
+## 7.5 Router Architecture & Evolution
+
+وثّقنا التطور التدريجي بالأرقام الحقيقية كالتالي:
+
+*   **المرحلة 1 — Thalamus وحده:**
+    *   **النتيجة:** 0/7 (0%)
+    *   **السبب:** Regex بدائي لا يفهم الدلالة.
+
+*   **المرحلة 2 — Thalamus + Prefrontal:**
+    *   **النتيجة:** 4/7 (57.1%)
+    *   **الإضافة:** Cosine Similarity مع `sentence-transformers`.
+    *   **النموذج:** `all-MiniLM-L6-v2`
+
+*   **المرحلة 3 — + Action Verbs Rule:**
+    *   **النتيجة:** 5/7 (71.4%)
+    *   **الإضافة:** قاعدة بسيطة في Thalamus حيث `"write/create/build" + "python/code" → code_cell += 0.4`.
+
+**الصيغة النهائية للـ score:**
+`final_score = (thalamus × 0.3) + (prefrontal × 0.7)`
+
 ## 8. Limitations & Future Work
+
+### 8.1 Limitations — Semantic Ambiguity
+
+وثّق السؤال 5 بالأرقام الحقيقية:
+
+**Query:** "Calculate the statistical probability of WWI given European alliance mathematics"
+
+**Raw scores:**
+*   math_cell:    0.0586
+*   code_cell:    0.0839  ← أعلى من math رغم المحتوى!
+*   history_cell: 0.1141
+*   Active cells: [] ← لا خلية تجاوزت 0.2
+
+**التحليل:**
+1. توزيع متساوٍ للإشارات بين `math` و `history`.
+2. "Calculate, statistical" ربطهما الـ embedding بالبرمجة أكثر من الرياضيات.
+3. الـ threshold عمل كـ Safety Valve صحيح.
+
+**الاستنتاج:**
+هذا يثبت الحاجة لـ Hippocampus كمنسق سياقي يحل الـ Semantic Ambiguity.
+
+### 8.2 Future Work
+
 To transition MSLM from a theoretical prototype to a production-ready system, the following future work is planned:
 1.  **Scale Training Data:** Exponentially increase the dataset size per cell (from hundreds of chunks to hundreds of thousands) using synthetic generation and curated corpus filtering.
 2.  **Generation Tuning:** Implement repetition penalties, top-k sampling adjustments, and temperature tuning to stabilize the outputs of the smaller base model.
