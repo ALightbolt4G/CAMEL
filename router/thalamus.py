@@ -29,16 +29,22 @@ class Thalamus:
         query_lower = query.lower()
         scores = {domain: 0.0 for domain in self.domain_map.keys()}
         
-        # Coarse and extremely fast classification
+        # Calculate the initial hint score (coarse classification)
         for domain, patterns in self.domain_map.items():
             match_count = 0
             for pattern in patterns:
                 if re.search(pattern, query_lower):
                     match_count += 1
             
-            # Calculate the initial hint score (coarse classification)
             # A score ceiling is applied, dividing by 3.0 means 3 distinct matches = 1.0 score
             if match_count > 0:
                 scores[domain] = min(1.0, match_count / 3.0)
                 
+        # Action Verb Rule: "Write Python" = code_cell prioritization
+        has_write = bool(re.search(r"write|create|build", query_lower))
+        has_code = bool(re.search(r"python|code|program|function|script", query_lower))
+        
+        if has_write and has_code:
+            scores["code"] = min(1.0, scores.get("code", 0.0) + 0.4)
+            
         return scores
