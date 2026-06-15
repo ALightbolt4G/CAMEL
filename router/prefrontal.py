@@ -23,7 +23,8 @@ class PrefrontalCortex:
         self.signatures = {
             "code": "programming, Python, algorithms, functions",
             "math": "mathematics, calculus, equations, algebra",
-            "history": "history, wars, events, civilizations"
+            "history": "history, wars, events, civilizations",
+            "rezero": "anime, light novel, subaru, emilia, witches, fantasy story, arc, return by death, isekai"
         }
         
         # Pre-compute signature embeddings

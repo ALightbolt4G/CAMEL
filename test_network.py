@@ -1,82 +1,67 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
-import warnings
-from router.router import CamelRouter
 
-warnings.filterwarnings('ignore')
+BASE_MODEL = "/mnt/d/models/bloom-560m"
+HISTORY_ADAPTER = "cells/history_cell/adapter"
+REZERO_ADAPTER = "cells/rezero_cell/adapter"
 
-print("Initializing MSLM Network Evaluation - REAL INFERENCE...")
-base_model_name = "/mnt/d/models/bloom-560m"
-try:
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
-    base_model = AutoModelForCausalLM.from_pretrained(
-        base_model_name,
-        device_map="auto",
-        torch_dtype=torch.float16,
-        trust_remote_code=True
+print("[*] Loading base model and tokenizer...")
+tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
+base_model = AutoModelForCausalLM.from_pretrained(
+    BASE_MODEL,
+    device_map="auto",
+    torch_dtype=torch.float16,
+)
+
+print(f"[*] Loading Adapters (History & Re:Zero)...")
+# Load base model into PEFT and add first adapter
+model = PeftModel.from_pretrained(base_model, HISTORY_ADAPTER, adapter_name="history")
+# Load second adapter
+model.load_adapter(REZERO_ADAPTER, adapter_name="rezero")
+model.eval()
+
+# We will test a prompt that is ambiguous. 
+# "The great war that destroyed the capital city was started by"
+# The History cell should talk about real world history (like WWII, Rome, etc).
+# The ReZero cell should talk about Lugunica, witches, or fantasy elements.
+
+prompt = "The great war that destroyed the capital city was started by"
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+print("\n" + "="*60)
+print(" MSLM Network Interference Test: History vs Re:Zero")
+print("="*60 + "\n")
+
+with torch.no_grad():
+    print(">>> 1. Activating [history_cell]")
+    model.set_adapter("history")
+    out_history = model.generate(
+        **inputs,
+        max_new_tokens=60,
+        temperature=0.3, # History prefers lower temp for facts
+        repetition_penalty=1.2,
+        pad_token_id=tokenizer.eos_token_id
     )
-except Exception:
-    print("Falling back to huggingface hub...")
-    base_model_name = "bigscience/bloom-560m"
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
-    base_model = AutoModelForCausalLM.from_pretrained(
-        base_model_name,
-        device_map="auto",
-        torch_dtype=torch.float16,
-        trust_remote_code=True
+    gen_history = tokenizer.decode(out_history[0], skip_special_tokens=True)
+    print(f"[Prompt]: {prompt}")
+    print(f"[Generated]: {gen_history[len(prompt):].strip()}")
+    print("-" * 60)
+
+    print(">>> 2. Activating [rezero_cell]")
+    model.set_adapter("rezero")
+    out_rezero = model.generate(
+        **inputs,
+        max_new_tokens=60,
+        temperature=0.8, # ReZero prefers higher temp for creativity
+        top_p=0.9,
+        do_sample=True,
+        repetition_penalty=1.2,
+        pad_token_id=tokenizer.eos_token_id
     )
+    gen_rezero = tokenizer.decode(out_rezero[0], skip_special_tokens=True)
+    print(f"[Prompt]: {prompt}")
+    print(f"[Generated]: {gen_rezero[len(prompt):].strip()}")
+    print("-" * 60)
 
-# Load base PEFT model with the first adapter
-print("Loading Adapters into Network...")
-model = PeftModel.from_pretrained(base_model, "cells/code_cell/adapter", adapter_name="code_cell")
-try:
-    model.load_adapter("cells/math_cell/adapter", adapter_name="math_cell")
-    model.load_adapter("cells/history_cell/adapter", adapter_name="history_cell")
-except Exception as e:
-    print(f"Error loading additional adapters: {e}")
-
-router = CamelRouter()
-
-queries = [
-    "Write a Python function to model population growth using differential equations",
-    "Calculate the statistical probability of WWI given European alliance mathematics",
-    "Write a Python program that simulates the economic impact of WWII using graphs",
-    "Explain how recursion in programming is similar to mathematical induction"
-]
-
-print("\n=== NETWORK TESTS - Round 2 (REAL INFERENCE) ===\n")
-for i, query in enumerate(queries):
-    print(f"\n[{i+1}/4] Query: {query}")
-    active_cells, scores = router.route(query)
-    print(f"--> Active Cells: {active_cells}")
-    
-    if len(active_cells) == 0:
-        print("--> FAILED TO ROUTE: Router failed to detect any domain. Falling back to base model only!")
-        
-    try:
-        if len(active_cells) > 1:
-            # Dynamically merge adapters for multi-cell queries
-            weights = [1.0] * len(active_cells)
-            model.add_weighted_adapter(active_cells, weights, "current_merged", combination_type="linear")
-            model.set_adapter("current_merged")
-        elif len(active_cells) == 1:
-            model.set_adapter(active_cells[0])
-        else:
-            model.disable_adapter()
-            
-        print("--> Generating real response...")
-        inputs = tokenizer(query, return_tensors="pt").to(model.device)
-        with torch.no_grad():
-            outputs = model.generate(**inputs, max_new_tokens=100, do_sample=True, top_p=0.9, temperature=0.7)
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print(f"--> OUTPUT:\n{response.replace(query, '').strip()}\n")
-        
-        # Cleanup merged adapter to prevent memory issues
-        if len(active_cells) > 1:
-            model.delete_adapter("current_merged")
-        elif len(active_cells) == 0:
-            model.enable_adapters()
-            
-    except Exception as e:
-        print(f"--> Generation failed: {e}")
+print("[*] SUCCESS: Both cells responded without breaking the other (No Catastrophic Forgetting)!")

@@ -28,7 +28,7 @@ class CamelRouter:
         active_cells = []
         cell_scores = {}
         
-        for domain in ["math", "code", "history"]:
+        for domain in ["math", "code", "history", "rezero"]:
             t_score = thalamus_scores.get(domain, 0.0)
             p_score = prefrontal_scores.get(domain, 0.0)
             

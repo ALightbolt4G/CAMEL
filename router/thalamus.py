@@ -13,7 +13,8 @@ class Thalamus:
             "math": [r"\d+", r"\+", r"-", r"\*", r"/", r"equals", r"matrix", r"equation", r"حساب", r"معادلة", r"رياضيات"],
             "code": [r"def\s+", r"fn\s+", r"import\s+", r"class\s+", r"struct\s+", r"return\s+", r"كود", r"برمجة", r"خوارزمية"],
             "history": [r"war", r"century", r"king", r"emperor", r"حرب", r"تاريخ", r"ملك", r"رئيس", r"قديم", r"معركة"],
-            "geography": [r"map", r"country", r"river", r"mountain", r"خريطة", r"بلد", r"نهر", r"جبل", r"عاصمة", r"قارة"]
+            "geography": [r"map", r"country", r"river", r"mountain", r"خريطة", r"بلد", r"نهر", r"جبل", r"عاصمة", r"قارة"],
+            "rezero": [r"subaru", r"emilia", r"rem", r"echidna", r"arc", r"witch", r"return by death", r"سوبارو", r"إيميليا", r"ريم"]
         }
         
     def route(self, query: str) -> Dict[str, float]:
