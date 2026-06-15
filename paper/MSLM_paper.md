@@ -46,6 +46,7 @@ Following the data preparation and fine-tuning on the `bigscience/bloom-560m` ba
 | **history_cell** | 3.327 | 3.212 | 0.3988 | 47 mins | 385 chunks |
 | **math_cell** | 3.084 | 2.883 | 0.4471 | 21 mins | 197 chunks |
 | **code_cell** | 2.722 | 2.591 | 0.4904 | 12 mins | 103 chunks |
+| **rezero_cell** | 3.975 | 3.188 | 0.4280 | 104 mins | 4545 chunks |
 
 ### 6.1 Loss Reduction Analysis
 ![Training Loss Comparison](figures/loss_comparison.png)
