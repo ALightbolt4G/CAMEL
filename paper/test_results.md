@@ -94,6 +94,33 @@ This document records the exact, empirical results of the multi-cell emergent ne
 **Q: What is a prime number?**
 > A: The answer to this question is not clear. It is a prime number if and only if every prime number can be written as a product of elementary numbers, such as the product of the prime numbers 2, 3, and 4. A prime number can also be written as a product of elementary numbers, such as the product of the prime numbers 2, 3, and 4. A prime number can also be written as a product of elementary numbers, such as the product of the prime numbers 2, 3
 
+### MATH_CELL v2 (Retrained with 7116 chunks — 36x more data)
+> **Training:** Start Loss 2.649 → End Loss 0.2995, Accuracy 92.55%, 138 mins, 7116 chunks (synthetic algebra + calculus + textbook extractions)
+
+**Q: What is the derivative of x^3?**
+> A: - (6) *(Incorrect. Should be 3x^2. The model output a single number with no explanation.)*
+
+**Q: Solve for x: 5x + 3 = 18**
+> A: , Solving For x 2 7. You can also solve this problem using the Newton method by setting: y - 3x 1 *(Partially correct — x=3 is the answer but the model said "2 7" incoherently. Newton method reference is irrelevant hallucination.)*
+
+**Q: What is the integral of 2x dx?**
+> A: Can you explain it? A: Yes, there are 2 ways to prove this equation using differentiation. The obvious way uses integration by parts and continuity with respect or inverse function formula: x(x - 1) + (x2)(1-x) (x0) = 0. *(Incorrect. Should be x^2 + C. The model hallucinated an unrelated derivation.)*
+
+**Q: Explain the Pythagorean theorem**
+> A: . Example 1 Find a value for x such that (x - 2)/2 = 5. Solution: Use Theorem 3 to find an interval in which both sides are equal... *(Failed. Did not explain the Pythagorean theorem at all. Generated a random exercise.)*
+
+**Q: What is a prime number?**
+> A: Chapter 6.3 Summing and Divergences If we want to sum, then the denominator must be zero. This means that all terms are negative! *(Complete hallucination. No relation to prime numbers.)*
+
+**Q: What is the fundamental theorem of calculus?**
+> A: [1] John W. Maxwell Jr. [2] What are some elementary properties about sums and differences? 3) How many positive integers can be written as a sum or difference... *(Complete hallucination. Generated bibliography-style text instead of an explanation.)*
+
+**Q: Solve the quadratic equation x^2 - 5x + 6 = 0**
+> A: Solving for x gives: 4 3 2 1 Solution is easy! You can also use Mathematica to solve this problem. *(Partially found the roots 2 and 3 (listed as "4 3 2 1") but the output is incoherent.)*
+
+**v1 vs v2 Comparison:**
+Despite training accuracy jumping from 44.71% to 92.55%, the inference quality showed **no meaningful improvement**. Both versions hallucinate and fail to answer correctly. This strongly confirms overfitting: the model memorized training data token patterns but cannot generalize to novel question phrasings.
+
 ## === NETWORK TESTS - Round 2 ===
 
 > **Note:** The following tests reflect the raw, unadulterated performance of the `CamelRouter` using the pure, non-overfitted `Thalamus` gene map.
@@ -130,3 +157,150 @@ This document records the exact, empirical results of the multi-cell emergent ne
 
 *   **Network Output (Real Thalamus - No routing):**
     > "The two problems are different in many ways, and they are also quite similar in many respects... The mathematical induction problem is a very different problem. It is a problem of finding a polynomial that answers the question 'What is the number of solutions of the system of equations that" *(Quality: 0.1 - Hallucination due to routing failure. The base model completely failed to answer contextually).*
+
+---
+
+## === REZERO_CELL TESTING ===
+
+> **Context:** `rezero_cell` was trained on 4545 chunks extracted from the Re:Zero light novel (Arcs 1-6). Training: Start Loss 3.975 → End Loss 3.188, Accuracy 0.4280, 104 minutes.
+
+### Specialized ReZero Questions
+**Q: "In Arc 6, what happens to Subaru at the Pleiades Watchtower?"**
+> *(Cell correctly activates fantasy narrative style. Output contains references to tower/journey context but details are hallucinated — the cell learned narrative patterns, not precise plot facts.)*
+
+**Q: "Explain the history of the Witch of Envy."**
+> *(Cell generates witch-related fantasy lore. Style matches light novel prose. Factual accuracy vs actual source material is low — names may appear but plot details are invented.)*
+
+### Cross-Interference Test (History vs ReZero)
+**Prompt: "Natsuki Subaru walked into the battlefield and saw"**
+
+*   **[HISTORY CELL]:** "...his platoon of Japanese troops marching to capture a field near Rangoun. After making their way through several battles, he reached Kachigahara where an army had been assembled..."
+    * *Observation: History cell rejected the fantasy premise entirely. Treated the Japanese name as a real-world entity and forced the output into a WWII Asian theatre context. Demonstrates that the adapter's probability distribution is anchored to historical language patterns.*
+
+*   **[REZERO CELL]:** "...that Emilia was about to make a huge mistake. 'It's time for me, you two!' 'I can't see how I can even sleep without my feet in this place…'"
+    * *Observation: Cell correctly identified the Re:Zero character. Generated supporting characters (Emilia) and adopted dialogue-heavy light novel style. Content is stylistically appropriate but plot details are fabricated.*
+
+---
+
+## === ADAPTER FUSION TEST ===
+
+> **Method:** Linear weight averaging using `peft.add_weighted_adapter()` with 50% history + 50% rezero weights.
+
+**Prompt: "Natsuki Subaru walked into the battlefield and saw"**
+
+*   **[FUSION CELL (50/50)]:** "...a group of soldiers at his side. The commander said that he had ordered them to be killed, but only one soldier was actually captured by their own men..."
+    * *Observation: The fusion output is a generic military narrative. Fantasy-specific names (Emilia) were suppressed by the history adapter's weight contribution. Historical specificity (Rangoun) was smoothed out by the fantasy adapter. The result is interpolation between two distributions, not emergent behavior. This is consistent with the known behavior of linear weight merging (Model Soups).*
+
+---
+
+## === ROUTER EVALUATION (ReZero Integration) ===
+
+> **Test:** Router updated with `rezero` domain in both Thalamus (keywords) and PFC (signature).
+
+| Query | Top Cell | Score | Threshold (0.2) | Status |
+|---|---|---|---|---|
+| "In Arc 6, what happens to Subaru at the Pleiades Watchtower?" | rezero_cell | 0.5283 | ✅ Passed | Correct |
+| "Explain the history of the Witch of Envy." | rezero_cell | 0.2560 | ✅ Passed | Correct (overcame "history" keyword) |
+| "Write a python script to simulate Return by Death loops." | code_cell | 0.4524 | ✅ Passed | Correct (action verb heuristic) |
+| "The great war that destroyed the capital city was started by" | history_cell | 0.3200 | ✅ Passed | Correct |
+
+**Note:** These queries contain **strong, unambiguous domain keywords** (Subaru, Emilia, Witch, python, war). This is why they cross the 0.2 threshold.
+
+---
+
+## === NETWORK TEST - Round 3 (Full 4-Cell Network with Math v2) ===
+
+> **Context:** All 4 cells loaded simultaneously (history, math_v2, code, rezero). Router uses Thalamus + PFC with 0.2 activation threshold. 8 queries of mixed complexity (simple + complex + multi-domain).
+
+**Query 1: "What is the derivative of x squared?"**
+*   **Router Scores:** `{math_cell: 0.1418, code_cell: 0.0810, rezero_cell: 0.0500, history_cell: 0.0072}`
+*   **Active Cells:** `[]`
+*   **Status:** ❌ FAILED — No cell crossed 0.2. Fell back to base model.
+*   **Output:** "The derivative of x squared is the square of the derivative of x. The derivative of x squared is the square of the derivative of x..." *(Repetition loop. Base model failure.)*
+
+**Query 2: "Who was Napoleon Bonaparte?"**
+*   **Router Scores:** `{history_cell: 0.1254, math_cell: 0.0854, code_cell: 0.0357, rezero_cell: 0.0273}`
+*   **Active Cells:** `[]`
+*   **Status:** ❌ FAILED — No cell crossed 0.2.
+*   **Output:** "The answer is no. Napoleon was a man who was not a man. He was a man who was not a man..." *(Complete base model hallucination + repetition.)*
+
+**Query 3: "Write a Python function to sort a list"**
+*   **Router Scores:** `{code_cell: 0.4098, math_cell: 0.0823, history_cell: 0.0793, rezero_cell: 0.0361}`
+*   **Active Cells:** `[code_cell]`
+*   **Status:** ✅ SUCCESS — code_cell activated (0.4098).
+*   **Output:** "by key. The returned value is an array of tuples (sorted keys, sorted values). For example: >>> l = ['a', 'b'] # Sorting the list: ['a', ('a'), ('b')]..." *(Activated correctly. Output has code-like structure but is logically confused.)*
+
+**Query 4: "What happens to Subaru in Arc 3?"**
+*   **Router Scores:** `{rezero_cell: 0.4579, math_cell: 0.1633, code_cell: 0.0460, history_cell: 0.0417}`
+*   **Active Cells:** `[rezero_cell]`
+*   **Status:** ✅ SUCCESS — rezero_cell activated (0.4579).
+*   **Output:** "It's not that I don't know. But, it's a bit weird… The way the people are doing things is strange and odd at times too! It's just something I've been thinking about for some time now as well…" *(Activated correctly. Output has light novel dialogue style. No specific Arc 3 plot details — hallucinated dialogue.)*
+
+**Query 5: "Write a Python program to calculate the derivative of x squared"**
+*   **Router Scores:** `{code_cell: 0.4766, math_cell: 0.1724, history_cell: 0.0317, rezero_cell: 0.0013}`
+*   **Active Cells:** `[code_cell]`
+*   **Status:** ✅ SUCCESS — code_cell activated (0.4766). Note: math_cell at 0.1724 did not cross threshold.
+*   **Output:** "with respect to: (x, y) = [x * [y^2 - 1] + 1][x]. The function returns an integer value representing its result..." *(Cell activated correctly but output is mathematically wrong.)*
+
+**Query 6: "Calculate the mathematical probability of WWI starting given the alliance system"**
+*   **Router Scores:** `{history_cell: 0.1198, code_cell: 0.0973, math_cell: 0.0515, rezero_cell: 0.0157}`
+*   **Active Cells:** `[]`
+*   **Status:** ❌ FAILED — All scores far below 0.2. Fell back to base model.
+*   **Output:** "the alliance system, and the alliance system's initial conditions. The probability of WWI starting is the probability of the alliance system's initial conditions being the same as..." *(Base model repetition loop.)*
+
+**Query 7: "Explain how recursion in programming is similar to mathematical induction"**
+*   **Router Scores:** `{code_cell: 0.3147, math_cell: 0.1574, rezero_cell: 0.0089, history_cell: 0.0063}`
+*   **Active Cells:** `[code_cell]`
+*   **Status:** ✅ SUCCESS — code_cell activated (0.3147). Previously this query failed with 0/0 activations in Round 2.
+*   **Output:** "The problem of the first stage can be reduced to: Find a function that returns an expression (evaluated at some point) and then call it with this new value..." *(Cell activated. Output is vaguely related but doesn't actually explain the analogy.)*
+
+**Query 8: "Write a Python simulation of World War II battle outcomes"**
+*   **Router Scores:** `{code_cell: 0.3950, history_cell: 0.3077, math_cell: 0.1091, rezero_cell: 0.0858}`
+*   **Active Cells:** `[code_cell, history_cell]` 🔥
+*   **Status:** ✅ SUCCESS — **FIRST MULTI-DOMAIN ACTIVATION!** Both code_cell (0.3950) and history_cell (0.3077) crossed threshold simultaneously. Previously this exact query returned `[]` in Round 2.
+*   **Output (code_cell used as primary):** "This is an example, but it can be used to generate similar results for any number or type other than integer and string types..." *(Both cells activated. Output came from code_cell. A proper implementation would merge both cell outputs via the Aggregator, which is not yet integrated.)*
+
+### Round 3 Summary
+
+| Metric | Round 2 (v1) | Round 3 (v2) | Change |
+|---|---|---|---|
+| **Activation Success Rate** | 0/7 (0%) | 5/8 (62.5%) | **+62.5%** |
+| **Multi-Domain Activation** | Never | 1 query (code+history) | **First ever** |
+| **Queries tested** | 7 (all complex) | 8 (4 simple + 4 complex) | Mixed difficulty |
+
+**Why did Round 3 succeed where Round 2 failed?**
+The improvement is NOT due to math_cell v2 retraining. The math_cell was never the primary activation in any query. The improvement comes from:
+1. **Adding the `rezero` domain** to the router expanded the PFC's embedding space, slightly shifting the cosine similarity scores for all domains.
+2. **Including simpler queries** (e.g., "Write a Python function to sort a list") which naturally produce higher single-domain scores.
+3. **The "Write Python" action verb heuristic** in the Thalamus adds +0.4 to code_cell, pushing it well above 0.2 for programming queries.
+
+**Honest conclusion:** The router works for queries with strong domain signals but still fails completely on short, keyword-poor, or semantically ambiguous queries.
+
+---
+
+## === FINAL SUMMARY OF ALL FINDINGS ===
+
+### What Works
+1. Individual LoRA cells learn domain-specific output styles (formatting, vocabulary, narrative structure)
+2. Adapter switching produces distinct outputs for the same prompt (expected LoRA behavior)
+3. Router ranks domains correctly ~71% of the time for unambiguous queries
+4. Router activates cells successfully when queries contain strong domain-specific keywords or action verbs
+5. **Multi-domain activation is possible** — proven once with code+history on "Write a Python simulation of WWII battle outcomes"
+6. Adapter fusion (linear weight merging) produces interpolated outputs without crashes — confirms LoRA compatibility
+
+### What Fails
+1. **Router activation on keyword-poor queries:** "What is the derivative of x squared?" and "Who was Napoleon Bonaparte?" both fail (scores ~0.12-0.14)
+2. **Factual accuracy:** All cells hallucinate facts across all versions and data sizes
+3. **Repetition:** Base model falls into severe repetition loops on routing failures
+4. **Semantic depth:** Cells learn surface patterns, not understanding
+5. **Overfitting:** Math cell v2 achieved 92.5% training accuracy but inference quality did not improve over v1
+6. **Math cell routing:** The PFC embedding model consistently associates math terminology with code, preventing math_cell from being the primary activation
+
+### Root Causes
+- **BLOOM-560m is too small** (560M params) for factual retention after LoRA fine-tuning
+- **Training data quality:** Synthetic data (sympy-generated equations) may train token prediction without teaching reasoning
+- **Router threshold (0.2) not calibrated** for short queries — needs per-query-length normalization or lower threshold
+- **PFC embedding bias:** `all-MiniLM-L6-v2` was trained on general text, not math — it conflates "calculate" with "programming"
+- **No generation controls:** Repetition penalty, top-k, and temperature tuning needed for all cells
+- **Pipeline not integrated:** Multi-domain activations route to primary cell only; Aggregator not connected
+

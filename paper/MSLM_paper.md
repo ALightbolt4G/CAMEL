@@ -2,185 +2,175 @@
 *A Biologically-Inspired Sparse Architecture for High-Efficiency Neural Networks*
 
 **Author:** Adham  
-**Status:** Architecture Completed & Ready for Evaluation  
+**Status:** Prototype — Components Validated Individually, End-to-End Integration Pending  
 
 ## Abstract
-We present MSLM (Multi Small Language Models), a novel architecture that replaces monolithic Dense Transformers with a network of specialized, highly efficient "Cells" (Tiny Transformers). Inspired by the human brain, MSLM employs Sparse Activation via a three-tiered Biological Router (Thalamus, Prefrontal Cortex, Hippocampus) and a Concept Graph with Hebbian Learning. Our theoretical analysis and upcoming benchmarks show that MSLM drastically reduces active VRAM consumption and achieves massive latency speedups compared to a dense baseline of equal parameter count. This makes it highly suitable for constrained hardware environments.
+We present MSLM (Multi Small Language Models), a modular architecture that decomposes a monolithic Dense Transformer into specialized "Cells" (LoRA adapters on a shared backbone). MSLM employs a two-tiered Biological Router (Thalamus for keyword matching, Prefrontal Cortex for semantic similarity) and includes theoretical designs for a Concept Graph with Hebbian Learning and a Hippocampus memory module. Our experiments on `BLOOM-560m` with 4GB VRAM demonstrate that individual cells learn domain-specific distributions, and adapter switching produces distinct outputs without mutual interference. However, the Router's activation threshold mechanism failed to reliably activate cells in practice, and the full end-to-end pipeline has not yet been integrated. This paper reports both successes and failures transparently.
 
 ## 1. Introduction
-Large Language Models (LLMs) suffer from severe computational inefficiencies due to their dense nature—every parameter is activated for every query. MSLM solves this by creating a "Gene Map" of knowledge domains where only the most relevant parameters are fired.
+Large Language Models (LLMs) activate all parameters for every query, regardless of the domain. MSLM proposes a modular alternative: a network of specialized LoRA adapters (Cells) on a frozen base model, activated selectively by a Biological Router. This paper documents the current state of the architecture — what works, what doesn't, and what remains theoretical.
 
 ## 2. Architecture: The Biological Router
-The MSLM router decides which cells to activate. It ensures zero VRAM waste during the initial routing phase.
+The router is designed to decide which cells to activate.
 
 ### 2.1 Thalamus (Zero-Parameter Routing)
-Using a Regex-based Keyword Matrix (Gene Map), the Thalamus provides an $O(N)$ domain hint without any tensor operations.
-### 2.2 Prefrontal Cortex (Weight Tying & Cosine Similarity)
-It reuses the shared embedding layer to calculate semantic similarity with domain centroids, ensuring zero extra parameters while providing deep contextual routing. A gating mechanism bypasses this step if Thalamus confidence is $> 0.8$.
-### 2.3 Hippocampus (Attention Reset)
-Maintains $O(1)$ conversational memory using an Exponential Moving Average (EMA). Crucially, it features an **Attention Reset (Context Switch)** mechanism that flushes memory upon detecting a strong, sudden shift in topic, preventing context pollution.
+Using a Regex-based Keyword Matrix (Gene Map), the Thalamus scans the query for domain-specific patterns (e.g., "war", "python", "equation"). It produces an initial score per domain in $O(N)$ time with zero tensor operations. **Status: Implemented and tested.** Works well for unambiguous queries but fails on semantically complex, multi-domain inputs.
+
+### 2.2 Prefrontal Cortex (Semantic Similarity)
+Uses `all-MiniLM-L6-v2` (a 23M parameter SentenceTransformer) to compute cosine similarity between the query embedding and pre-defined domain signature embeddings. **Status: Implemented and tested.** Provides useful semantic signal, but its VRAM cost (~90MB) means the routing phase is not truly "zero VRAM" — only the Thalamus qualifies for that claim.
+
+**Note:** A gating mechanism (bypass PFC if Thalamus confidence > 0.8) is described in the architecture but is not implemented in the current codebase.
+
+### 2.3 Hippocampus (Context Memory)
+Designed to maintain conversational memory using an Exponential Moving Average (EMA) with attention reset for topic switches. **Status: Implemented as standalone module.** Used only in the interactive demo (`demo.py`) for score adjustment. Never tested with actual model inference or measured for impact on routing accuracy.
 
 ## 3. The Concept Graph & Hebbian Learning
-Cells are connected via an Adjacency Matrix $W$.
-Activation spreads via a fast, branchless 1-hop matrix multiplication: $A_{t+1} = \max(0, \min(1, A_t + \alpha (W \cdot A_t)))$.
-Connections are updated dynamically using a **One-Shot Hebbian Learning** rule based on the outer product of activations ($C = A_t A_t^T$), controlled by neuromodulation (success feedback).
+Cells are connected via an Adjacency Matrix $W$. Activation spreads via: $A_{t+1} = \max(0, \min(1, A_t + \alpha (W \cdot A_t)))$. Connections update using Hebbian Learning: $\Delta W = \eta \cdot C \cdot (1 - W) - \gamma \cdot W$ where $C = A_t A_t^T$.
+
+**Status: Implemented and unit-tested.** However, Spreading Activation and Hebbian Learning are used only in `demo.py` (a terminal simulation). They have never been integrated into the real inference pipeline or tested with actual model outputs.
 
 ## 4. Aggregation & Weight Tying
-Cell outputs are merged using a simple Weighted Sum. To convert the final context vector into vocabulary logits without blowing up the parameter count, the **Aggregator** employs *Weight Tying* with the shared embedding layer.
+Cell outputs are merged using a Weighted Sum. The Aggregator employs Weight Tying with the shared embedding layer to produce vocabulary logits. **Status: Implemented and unit-tested.** Never used in the real inference pipeline because the pipeline (`pipeline.py`) is not integrated — all forward methods are `pass` stubs.
 
-## 5. Benchmarks & Results
-We evaluated MSLM against a Dense Monolithic Transformer (Baseline) of equivalent total size using a multi-domain synthetic dataset.
+## 5. Theoretical Performance Projections
+To estimate the efficiency gains of sparse activation, we compared two randomly-initialized models (not the real MSLM system):
+- **Dense Baseline:** ~15M parameter Transformer
+- **Mock MSLM:** ~4.9M parameter single-cell Transformer
 
-| Metric | Dense Baseline (~15M params) | CAMEL MSLM (~4.9M active) | Improvement |
+| Metric | Dense Model (~15M params) | Single Cell (~4.9M params) | Ratio |
 |---|---|---|---|
-| **Latency** | 18.07 ms / query | 6.01 ms / query | **3.00x Faster** |
-| **Active VRAM** | 67.02 MB | 22.38 MB | **66.6% Reduction** |
+| **Latency** | 18.07 ms / query | 6.01 ms / query | **3.00x** |
+| **VRAM** | 67.02 MB | 22.38 MB | **66.6% smaller** |
 
-*(Note: Hardware numbers generated via `benchmark/evaluate.py`)*
+> [!WARNING]
+> These numbers are **theoretical projections** from `benchmark/evaluate.py` using toy models with random weights. They measure the architectural overhead difference between a 15M-parameter and 4.9M-parameter transformer, not the actual MSLM system performance. The real system uses BLOOM-560m (560M parameters) and was not benchmarked end-to-end.
 
 ## 6. Training Results
-Following the data preparation and fine-tuning on the `bigscience/bloom-560m` base model using QLoRA (`nf4`, `fp16`), we obtained the following empirical results across our specialized domain cells:
+Fine-tuning on `bigscience/bloom-560m` using LoRA (`r=16, alpha=32, fp16`) on a 4GB VRAM Quadro M1200 GPU:
 
-| Cell | Start Loss | End Loss | Final Accuracy | Training Time | Data Size |
-|---|---|---|---|---|---|
-| **history_cell** | 3.327 | 3.212 | 0.3988 | 47 mins | 385 chunks |
-| **math_cell** | 3.084 | 2.883 | 0.4471 | 21 mins | 197 chunks |
-| **code_cell** | 2.722 | 2.591 | 0.4904 | 12 mins | 103 chunks |
-| **rezero_cell** | 3.975 | 3.188 | 0.4280 | 104 mins | 4545 chunks |
+| Cell | Version | Start Loss | End Loss | Final Accuracy | Training Time | Data Size |
+|---|---|---|---|---|---|---|
+| **history_cell** | v1 | 3.327 | 3.212 | 0.3988 | 47 mins | 385 chunks |
+| **math_cell** | v1 | 3.084 | 2.883 | 0.4471 | 21 mins | 197 chunks |
+| **math_cell** | **v2** | **2.649** | **0.2995** | **0.9255** | **138 mins** | **7116 chunks** |
+| **code_cell** | v1 | 2.722 | 2.591 | 0.4904 | 12 mins | 103 chunks |
+| **rezero_cell** | v1 | 3.975 | 3.188 | 0.4280 | 104 mins | 4545 chunks |
 
-### 6.1 Loss Reduction Analysis
-![Training Loss Comparison](figures/loss_comparison.png)
+These are real numbers from actual training runs.
 
-The loss comparison chart illustrates the delta between the initial untrained loss and the final loss after fine-tuning. The `code_cell` exhibited the lowest overall loss profile, likely due to the structural predictability of code syntax matching closely with the base model's pre-training distribution. The `history_cell` showed the highest starting loss due to the high perplexity of diverse historical names and dates, which required more epochs to stabilize.
+### 6.1 Math Cell v2: Massive Data Scaling Experiment
+The `math_cell` was retrained with 36x more data (197 → 7116 chunks) using a mixed dataset: synthetic algebra/calculus problems generated via SymPy, theorem Q&A, and descriptive text extracted from *Thomas' Calculus* and *The Art and Craft of Problem Solving* PDF textbooks.
 
-### 6.2 Accuracy Comparison
-![Final Accuracy Comparison](figures/accuracy_comparison.png)
+**Training metrics improved dramatically:** Loss dropped from 2.649 to 0.2995 (perplexity 14.13 → 1.35), and token accuracy reached 92.55% (peak: 94.12%).
 
-This figure demonstrates the inverse relationship between data volume and accuracy in our specific small-model testing paradigm. The `code_cell` achieved nearly ~50% accuracy on its evaluation set, significantly outperforming the `history_cell`. This visually supports our hypothesis regarding data quality and structural bias in the foundational weights.
+**However, these numbers require a critical caveat:** A training accuracy of 92.5% with a loss of 0.29 on a 560M model almost certainly indicates **overfitting**. The model memorized training data patterns rather than learning generalizable mathematical reasoning. This is confirmed by the output quality tests (Section 7), where the model fails to correctly answer basic questions it should have memorized. The likely explanation is that the model learned to predict tokens within the truncated 1200-character training chunks but cannot generalize to novel phrasings.
 
-### 6.3 Hardware & Time Efficiency
-![Training Time per Cell](figures/training_time.png)
+### 6.2 General Analysis
+- **Code cell** achieved the lowest v1 loss despite the smallest dataset, likely because BLOOM's pre-training data already contains substantial code.
+- **ReZero cell** started with the highest loss (3.975) due to fantasy content with Japanese names being far from BLOOM's distribution.
+- **History cell** showed the smallest loss reduction (Δ = 0.115). The 385-chunk dataset was insufficient.
+- Data volume alone does not guarantee output quality — the math_cell v2's high training accuracy did not translate to factually correct inference outputs.
 
-The training time chart highlights the extreme efficiency of QLoRA on the 4GB VRAM Quadro M1200. The `code_cell` completed training in just 12 minutes, while the largest dataset (`history_cell`) took only 47 minutes. This proves that dynamically training independent, modular components is vastly more resource-efficient than continuously pre-training monolithic models.
+## 7. Cell Output Quality (Honest Assessment)
+Individual cells were tested with domain-specific questions. Results are mixed:
 
-### 6.4 Analysis & Hypotheses
-*   **Hypothesis 1 (H1) Proven:** *BLOOM pretrained on code $\rightarrow$ code_cell learns faster with less data.* Despite having the smallest dataset (103 chunks) and the shortest training time (12 mins), the `code_cell` achieved the highest final accuracy (0.4904). This demonstrates that aligning the specialized adapter with the base model's latent pre-training distribution yields highly efficient emergent capabilities.
-*   **Quality over Quantity:** Less data + more focus = higher accuracy. The stringent quality filters employed during data preparation ensured that the minimal data fed into the `code_cell` and `math_cell` was dense and noise-free, yielding superior empirical results compared to broader generic training sets.
+### 7.1 What Works
+- **Domain-specific style transfer:** Each cell adopts a distinct output style. The Math cell uses "Definition 1.1" formatting. The Code cell produces function-like structures. The History cell references nations and dates. The ReZero cell generates fantasy dialogue with character names.
+- **Adapter switching:** Loading multiple adapters and switching between them produces clearly different outputs for the same prompt, confirming that LoRA adapters function as intended behavioral switches.
 
-## 7. Result Analysis
+### 7.2 What Fails
+- **Factual accuracy is poor across all cells.** The History cell called Hitler "the leader of the Allied Army." The Math cell defined the Pythagorean theorem as "the law of continuity in number theory." The Code cell defined list comprehension as "a dictionary." These are severe hallucinations that make the outputs unreliable for any factual use.
+- **Repetition loops:** The History cell frequently enters repetition ("The answer is not known. The question is what caused World War I. The answer is not known..."). This is a known failure mode of small models fine-tuned on tiny datasets without repetition penalties.
+- **Shallow semantic understanding:** Cells learned surface-level patterns (formatting, vocabulary) but not deep understanding. The Code cell produces syntactic structures that look like code but are logically incorrect.
 
-### 7.1 What Succeeded (Architecture Validation)
-The empirical results validate the core MSLM hypothesis:
-*   **Biological Routing Accuracy:** The Router successfully activated the correct cells for all queries. Multi-domain queries precisely triggered the union of the necessary domains.
-*   **True Sparse Activation:** Irrelevant cells remained perfectly dormant, confirming zero VRAM waste for unneeded parameters.
-*   **Hardware Efficiency:** The entire dynamic multi-cell system functioned flawlessly on a 4GB VRAM Quadro M1200 GPU, processing all queries within a span of 80 minutes total training and testing time.
-*   **Academic Formatting (Math):** The `math_cell` outputted highly structured academic responses (e.g., formatting answers as "Definition 1.1", "chapter by chapter"), demonstrating domain-specific stylistic adaptation.
+**Root cause:** BLOOM-560m is too small (560M params) to retain factual knowledge after LoRA fine-tuning with minimal data (100-4500 chunks). The cells learn style, not substance.
 
-### 7.2 What Needs Improvement (Data & Base Model Limitations)
-Due to the constraints of training on consumer hardware with minimal data, some expected limitations of small language models manifested:
-*   **Repetition Problem (`history_cell`):** The model occasionally fell into repetition loops (e.g., repeating "The answer is not known."). This is a common failure mode when a small base model (BLOOM-560m) is fine-tuned on a very small dataset without generation penalties.
-*   **Lack of Deep Specialization (`code_cell`):** While syntactic structure was learned, semantic depth was lacking (e.g., defining a list comprehension as a dictionary). The 103 data chunks were insufficient to override the base model's broader, less precise programming knowledge.
-*   **Hallucinations (`history_cell`):** The model falsely identified Adolf Hitler as the "leader of the Allied Army." This severe hallucination highlights the inherent knowledge deficiency in 560M parameter models when unsupported by massive factual datasets or RAG (Retrieval-Augmented Generation).
+## 8. Router Performance (Honest Assessment)
 
-### 7.3 Hypothesis Verification
-*   **H1 Proven:** The `code_cell` achieved the best final metrics (Loss 2.591, Accuracy 0.4904) despite having the smallest dataset. This proves that aligning the adapter domain with the base model's strong pre-trained priors (BLOOM's code capability) yields disproportionate emergent gains.
-*   **Quality over Quantity Proven:** The direct correlation between highly focused, low-noise data (Math/Code) and higher final accuracy confirms that strict data filtering is more valuable than sheer volume for specialized LoRA cells.
+### 8.1 Ranking Accuracy (What Partially Works)
+Using `eval_router.py`, we tested whether the router assigns the **highest score** to the correct domain. The scoring formula is: $Final = (Thalamus \times 0.3) + (Prefrontal \times 0.7)$.
 
-### 7.4 Advanced Diagnostic Visualizations
-To further validate the network's emergent behavior, a second round of complex, multi-domain tests was conducted. The following visualizations demonstrate the router's precision and the qualitative leap achieved through cell merging.
+| Phase | Ranking Accuracy | Notes |
+|---|---|---|
+| Thalamus alone | 0/7 (0%) | Pure regex failed all semantic queries |
+| Thalamus + PFC | 4/7 (57.1%) | Semantic embeddings helped significantly |
+| + Action Verb Rule | 5/7 (71.4%) | Heuristic for "Write Python" → code_cell |
 
-#### Activation Heatmap
-![Activation Heatmap](figures/activation_heatmap.png)
-This heatmap tracks the Prefrontal Cortex activation scores for each cell across four complex queries. Notice the distinct sparse activation: Query 3 (simulating the economic impact of WWII using graphs) successfully activated the `code_cell`, `history_cell`, and `math_cell` simultaneously, while keeping activation zero for irrelevant combinations in other queries.
+### 8.2 Activation Accuracy
+We ran two rounds of network tests. The first round (v1, before Re:Zero integration) tested 7 complex multi-domain queries. The second round (v2, full network with all 4 cells) tested 8 queries of mixed complexity.
 
-#### Cell vs. Network Quality Comparison
-![Single Cell vs Network Performance](figures/cell_vs_network.png)
-When querying the network with a cross-domain concept ("Explain how recursion is similar to mathematical induction"), the isolated `code_cell` provided a shallow, single-domain response. However, when the network merged the `code_cell` and `math_cell`, the qualitative scores for Relevance, Coherence, and Depth nearly doubled, proving the synergistic power of the CAMEL architecture.
+**Round 1 (v1): 0/7 activation success (0%)**
+All 7 multi-domain queries failed to activate any cell. Every score was below the 0.2 threshold.
 
-#### Response Length Analysis
-![Response Length per Cell](figures/response_length.png)
-This chart acts as a proxy for response richness. The `code_cell` typically generates longer responses due to the inclusion of code blocks and structural syntax, whereas the `math_cell` favors concise, theorem-based answers.
+**Round 2 (v2): 5/8 activation success (62.5%)**
 
-## 8. Router Architecture & Evolution
+| Query | Active Cells | Top Score | Status |
+|---|---|---|---|
+| "What is the derivative of x squared?" | `[]` | math: 0.1418 | ❌ FAILED |
+| "Who was Napoleon Bonaparte?" | `[]` | history: 0.1254 | ❌ FAILED |
+| "Write a Python function to sort a list" | `[code_cell]` | code: 0.4098 | ✅ SUCCESS |
+| "What happens to Subaru in Arc 3?" | `[rezero_cell]` | rezero: 0.4579 | ✅ SUCCESS |
+| "Write a Python program to calculate derivative of x squared" | `[code_cell]` | code: 0.4766 | ✅ SUCCESS |
+| "Calculate mathematical probability of WWI..." | `[]` | history: 0.1198 | ❌ FAILED |
+| "Explain how recursion is similar to mathematical induction" | `[code_cell]` | code: 0.3147 | ✅ SUCCESS |
+| "Write a Python simulation of WWII battle outcomes" | `[code_cell, history_cell]` | code: 0.3950, history: 0.3077 | ✅ SUCCESS (multi-domain!) |
 
-The development of the Biological Router demonstrated a clear, measurable progression in routing accuracy through architectural enhancements. The evaluation was conducted on a rigorous set of 7 cross-domain queries. 
+**Key observations:**
+- The router now successfully activates cells for queries with clear action verbs ("Write", "Explain") or strong domain keywords ("Subaru", "Python").
+- **First successful multi-domain activation:** "Write a Python simulation of WWII battle outcomes" activated BOTH `code_cell` (0.3950) and `history_cell` (0.3077). This is the first empirical evidence of the router activating multiple cells for a single query.
+- The router still fails on short, keyword-poor queries ("What is the derivative of x squared?", "Who was Napoleon Bonaparte?"). These produce scores in the 0.12-0.14 range — well below the 0.2 threshold.
+- **The math_cell was never the primary activation** in any query, despite having the most data. The PFC embedding model associates mathematical terminology with programming more strongly than with pure math.
 
-**Phase 1 — Thalamus Alone:**
-*   **Accuracy:** 0/7 (0%)
-*   **Analysis:** The primitive Regex-based mapping completely failed. It was unable to parse the semantics of the queries, relying solely on exact hardcoded matches.
+### 8.3 Previously Confirmed Routing (Re:Zero Integration)
+- "In Arc 6, what happens to Subaru at the Pleiades Watchtower?" → `rezero_cell` (0.5283) ✅
+- "Explain the history of the Witch of Envy" → `rezero_cell` (0.2560) ✅
+- "Write a python script to simulate Return by Death loops" → `code_cell` (0.4524) ✅
+- "The great war that destroyed the capital city was started by" → `history_cell` (0.3200) ✅
 
-**Phase 2 — Thalamus + Prefrontal Cortex:**
-*   **Accuracy:** 4/7 (57.1%)
-*   **Enhancement:** Integrated `sentence-transformers` utilizing the `all-MiniLM-L6-v2` model. This allowed for Zero-shot Cosine Similarity matching against cell signatures.
+### 8.4 The Semantic Ambiguity Problem
+Query: *"Calculate the statistical probability of WWI given European alliance mathematics"*
 
-**Phase 3 — Thalamus Action Verbs Rule:**
-*   **Accuracy:** 5/7 (71.4%)
-*   **Enhancement:** Implemented a simple heuristic rule in the Thalamus: If the query contains action verbs like "write/create/build" combined with "python/code", it prioritizes the `code_cell` by adding +0.4 to its score.
-*   **Final Scoring Formula:** $Final Score = (Thalamus \times 0.3) + (Prefrontal \times 0.7)$
+| Cell | Score |
+|---|---|
+| math_cell | 0.0586 |
+| code_cell | 0.0839 |
+| history_cell | 0.1141 |
 
-## 9. Limitations: The Semantic Ambiguity Problem
+All scores are far below the 0.2 threshold. The embedding model associates "Calculate" and "statistical" with programming more than pure math. The equal semantic distribution across domains prevents any single cell from activating. The 0.2 threshold correctly prevents false activation, but the system produces no useful output as a result.
 
-During the rigorous evaluation, Query 5 exposed a fascinating architectural limitation:
-
-**Query:** *"Calculate the statistical probability of WWI given European alliance mathematics"*
-
-**Raw Router Scores:**
-*   `math_cell`: 0.0586
-*   `code_cell`: 0.0839 *(Scored higher than math despite the context!)*
-*   `history_cell`: 0.1141
-*   **Active Cells:** `[]` *(None surpassed the 0.2 threshold)*
-
-**Analysis:**
-1.  **Equal Signal Distribution:** The semantics were perfectly split between math and history.
-2.  **Embedding Bias:** The embedding model associated terms like "Calculate" and "statistical" more strongly with programming than pure mathematics.
-3.  **The Safety Valve:** Instead of randomly guessing or forcing an incorrect activation, the 0.2 threshold acted successfully as a Safety Valve, causing the router to abstain from routing.
-
-## 10. Representational Independence & Adapter Fusion
-
-A critical academic concern during development was the **Illusion of Separation**: the possibility that the model's different outputs were merely surface-level hallucination shifts rather than true distribution separation. If all cells shared the same semantic space uncontrollably, the architecture would be structurally flawed.
-
-To prove that adding a new cell does **not** degrade the structural integrity or cause Catastrophic Forgetting, we conducted a **Cross-Interference Test (Adapter Fusion)**. We loaded both the `history_cell` (factual, rigid) and the `rezero_cell` (fantasy, high-entropy) simultaneously, merging their weights linearly ($W_{fusion} = 0.5 \times W_{history} + 0.5 \times W_{rezero}$).
+## 9. Adapter Fusion Experiment
+We loaded both `history_cell` and `rezero_cell` simultaneously and tested with an ambiguous prompt.
 
 **Test Prompt:** *"Natsuki Subaru walked into the battlefield and saw"*
-*(Note: Natsuki Subaru is a fictional character from the Re:Zero fantasy novel).*
 
-*   **[HISTORY CELL Alone]:** *"...his platoon of Japanese troops marching to capture a field near Rangoun. After making their way through several battles, he reached Kachigahara where an army had been assembled..."*
-    *   **Analysis:** The History Cell completely rejected the fantasy premise. It treated the Japanese name as a real-world entity and forcefully pulled the narrative into a World War II / Asian theatre context. This proves **Representational Independence**; the cell's probability distribution is strictly bounded to factual/historical phrasing.
-*   **[REZERO CELL Alone]:** *"...that Emilia was about to make a huge mistake. 'It’s time for me, you two!' 'I can’t see how I can even sleep without my feet in this place…'"*
-    *   **Analysis:** The cell correctly identified the character, spawning relevant supporting characters (Emilia) and adopting the dramatic, dialogue-heavy style of a Light Novel.
-*   **[FUSION CELL (50/50)]:** *"...a group of soldiers at his side. The commander said that he had ordered them to be killed, but only one soldier was actually captured by their own men..."*
-    *   **Analysis:** This generated a profound **Emergent Behavior**. The fantasy names (Emilia) were suppressed by the history cell's gravity, and the strict historical locations (Rangoun) were smoothed out by the fantasy cell's narrative style. The result was a generic, generalized military narrative.
+| Adapter | Output Summary | Observation |
+|---|---|---|
+| **History** | "...his platoon of Japanese troops marching to capture a field near Rangoun..." | Rejected fantasy context; pulled name into WWII Asian theatre |
+| **ReZero** | "...that Emilia was about to make a huge mistake..." | Correctly identified character; generated fantasy dialogue |
+| **Fusion (50/50)** | "...a group of soldiers at his side. The commander said..." | Generic military narrative; neither fully historical nor fantasy |
 
-**Conclusion:** Adding new cells dynamically scales the MSLM architecture. Because LoRA weights act as conditional behavioral switches applied to a frozen backbone, the system behaves exactly like a highly-efficient Modular LLM or Mixture of Experts (MoE), strictly guaranteeing zero catastrophic forgetting between domains.
+**Interpretation:**
+- The two adapters produce genuinely different probability distributions for the same prompt. This is expected since LoRA adapters modify frozen backbone weights additively — by design, switching adapters changes the output distribution.
+- The fusion result (linear weight averaging) is a well-known technique called "Model Soups" (Wortsman et al., 2022). The blended output is interpolation, not emergent behavior. It confirms that the adapter weights are compatible for linear combination, but this is a property of LoRA architecture generally, not a novel finding of MSLM.
+- No catastrophic forgetting was observed, but this is trivially guaranteed by LoRA's frozen-backbone design. It would be notable only if the backbone weights were modified during training, which they were not.
 
-## 11. Router Evolution: Multi-Domain Disambiguation
+## 10. Known Limitations
 
-Before finalizing the Re:Zero integration, the Biological Router (Thalamus + Prefrontal Cortex) was updated and evaluated to ensure it could handle highly overlapping semantic domains without confusion.
+1. **Pipeline not integrated:** `pipeline.py` contains only `pass` stubs. The full end-to-end flow (Router → Graph → Cell → Aggregator) has never executed as a unified system.
+2. **Router activation threshold too aggressive:** The 0.2 threshold prevents false positives but also prevents all activations on complex queries. Needs calibration or a different mechanism.
+3. **Base model too small:** BLOOM-560m cannot retain factual accuracy after LoRA fine-tuning. Cells learn stylistic patterns, not knowledge.
+4. **Training data too small:** 100-4500 chunks per domain is insufficient for robust specialization. Repetition and hallucination are direct consequences.
+5. **Hippocampus, ConceptGraph, Hebbian Learning are untested in real inference:** These components exist as code but their impact on actual system performance is unknown.
+6. **No standard benchmarks:** All evaluations are qualitative. No BLEU, ROUGE, perplexity, or domain-classification metrics were computed.
 
-**Router Evaluation Results:**
-1.  **Query:** *"In Arc 6, what happens to Subaru at the Pleiades Watchtower?"*
-    *   **Result:** `rezero_cell` (Score: 0.5283) - *Correct*
-2.  **Query:** *"Explain the history of the Witch of Envy."*
-    *   **Result:** `rezero_cell` (Score: 0.2560) - *Correct (Overcame the word "history")*
-3.  **Query:** *"Write a python script to simulate Return by Death loops."*
-    *   **Result:** `code_cell` (Score: 0.4524) vs `rezero_cell` (Score: 0.1965) - *Correct (Action-Verb heuristic successfully prioritized coding over the fantasy lore)*
-4.  **Query:** *"The great war that destroyed the capital city was started by"*
-    *   **Result:** `history_cell` (Score: 0.3200) - *Correct*
+## 11. Future Work
+1. **Integrate the full pipeline:** Connect Router → ConceptGraph → Cell Loading → Aggregator in a single forward pass.
+2. **Calibrate router thresholds:** Use a validation set to find optimal activation thresholds per domain.
+3. **Scale training data:** Move from hundreds to tens of thousands of chunks per cell.
+4. **Add generation controls:** Repetition penalties, top-k sampling, temperature tuning.
+5. **Upgrade base model:** Test with Phi-3 (3B) or Llama-3 (8B) on capable hardware.
+6. **Implement standard benchmarks:** Measure perplexity, domain classification accuracy, and factual correctness systematically.
+7. **Test Hippocampus + Hebbian Learning with real inference:** Measure their actual impact on multi-turn conversation quality.
 
-The router demonstrated robust disambiguation, successfully utilizing both coarse regex (Thalamus) and deep sentence embeddings (Prefrontal) to route complex edge cases flawlessly.
-
-
-
-**Conclusion:**
-This behavior proves that while the Prefrontal Cortex is highly effective at semantic matching, it struggles with complex, evenly distributed Semantic Ambiguity. This explicitly validates the future necessity of the **Hippocampus** to act as a contextual coordinator capable of resolving such deep semantic conflicts.
-
-## 10. Future Work
-To transition MSLM from a theoretical prototype to a production-ready system, the following future work is planned:
-1.  **Scale Training Data:** Exponentially increase the dataset size per cell (from hundreds of chunks to hundreds of thousands) using synthetic generation and curated corpus filtering.
-2.  **Generation Tuning:** Implement repetition penalties, top-k sampling adjustments, and temperature tuning to stabilize the outputs of the smaller base model.
-3.  **Domain Expansion:** Introduce new `geography_cell`, `science_cell`, and `literature_cell` adapters to test the router's scalability to $N > 10$.
-4.  **Base Model Scaling:** Test the architecture utilizing larger, highly capable open-source foundation models (e.g., Llama-3 8B, Phi-3 3B) on more capable hardware to measure the ceiling of emergent behaviors.
-5.  **Long-Context Hebbian Testing:** Measure the efficacy of the Hebbian Learning matrix ($W$) over multi-turn, hour-long conversations to track dynamic link strengthening.
-
-## 11. Conclusion
-MSLM successfully demonstrates that "The goal is not to build a bigger brain — but a smarter one." By leveraging sparse biological routing, attention resets, and hebbian graph structures, MSLM sets a new paradigm for efficient AI.
+## 12. Conclusion
+MSLM demonstrates that modular LoRA-based specialization can produce domain-specific output styles from a shared backbone model. The Biological Router (Thalamus + Prefrontal Cortex) can rank domains with ~71% accuracy on unambiguous queries but fails to activate cells for complex multi-domain inputs. Individual components (Router, Cells, ConceptGraph, Aggregator) are implemented and unit-tested, but the full pipeline is not yet integrated. The project establishes a foundation for modular LLM architectures but requires significant work on router calibration, data scaling, and end-to-end integration before it can deliver on the promise of intelligent sparse activation.

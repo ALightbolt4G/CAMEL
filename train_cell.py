@@ -59,9 +59,18 @@ def main():
         save_strategy="epoch",
         num_train_epochs=3,
         fp16=True,
-        max_length=512,
         dataset_text_field="text"
     )
+    
+    # Truncate dataset manually to avoid massive strings causing TDR timeouts
+    def truncate_text(example):
+        # 1200 chars is roughly 250-300 tokens, perfectly safe for 4GB VRAM
+        if len(example["text"]) > 1200:
+            example["text"] = example["text"][:1200]
+        return example
+        
+    dataset["train"] = dataset["train"].map(truncate_text)
+    dataset["eval"] = dataset["eval"].map(truncate_text)
     
     # 6. SFT Trainer
     trainer = SFTTrainer(
